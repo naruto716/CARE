@@ -7,6 +7,14 @@ import os from 'os';
 import { spawnPythonSubprocess, terminateSubprocess, setSubProcess } from './python';
 import { uploadImageToS3, initS3Client } from './s3';
 import { getAWSConfig } from './settings';
+import {
+    sendDetectionRequest,
+    onJobResult,
+    removeJobHandler,
+    startResultsListener,
+    DetectionResult,
+    initSQSClient
+} from './sqsClient';
 
 function getAppDataDir() {
     if (process.platform === 'win32') {
@@ -178,7 +186,8 @@ export class JobManager {
                     await this.handleThumbnailJob(job);
                     break;
                 case 'detect':
-                    await this.handleDetectJob(job);
+                    // Use cloud detection via SQS
+                    await this.handleCloudDetectJob(job);
                     break;
                 case 'reid':
                     await this.handleReidJob(job);
@@ -971,6 +980,108 @@ export class JobManager {
         } finally {
             // Cleanup
             await fs.remove(manifestPath).catch(() => { });
+        }
+    }
+
+    /**
+     * Handle detection via cloud SQS pipeline.
+     * Sends request to worker and waits for result.
+     */
+    private async handleCloudDetectJob(job: Job): Promise<void> {
+        const { imageIds, chainToReid, species } = job.payload;
+
+        if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+            throw new Error('No image IDs provided for detection');
+        }
+
+        // Initialize SQS client
+        initSQSClient();
+
+        // Get images from database to fetch cloud_urls
+        const images = DatabaseService.getImagesByIds(imageIds);
+
+        // Filter to only images that have cloud_url
+        const cloudImages = images.filter((img: any) => img.cloud_url);
+        if (cloudImages.length === 0) {
+            throw new Error('No images have cloud URLs. Please ensure images are uploaded to S3 first.');
+        }
+
+        console.log(`[Cloud Detect] Processing ${cloudImages.length} images with cloud URLs`);
+
+        // Build SQS request - use s3_url field name (api_worker.py expects this)
+        const sqsImages = cloudImages.map((img: any) => ({
+            image_id: img.id,
+            s3_url: img.cloud_url
+        }));
+
+        job.message = 'Sending to cloud...';
+        this.emitUpdate();
+
+        // Send request to SQS
+        await sendDetectionRequest({
+            job_id: job.id,
+            mode: 'detection',
+            images: sqsImages
+        });
+
+        job.message = 'Processing in cloud...';
+        this.emitUpdate();
+
+        // Wait for result via callback
+        const result = await new Promise<DetectionResult>((resolve, reject) => {
+            // Timeout after 15 minutes
+            const timeout = setTimeout(() => {
+                removeJobHandler(job.id);
+                reject(new Error('Cloud detection timed out'));
+            }, 15 * 60 * 1000);
+
+            onJobResult(job.id, (res: DetectionResult) => {
+                clearTimeout(timeout);
+                resolve(res);
+            });
+        });
+
+        if (result.status === 'failed') {
+            throw new Error(result.error || 'Cloud detection failed');
+        }
+
+        // Save results to database
+        job.message = 'Saving results...';
+        this.emitUpdate();
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const batchName = `Detection ${dateStr} ${timeStr}`;
+
+        const batchId = DatabaseService.createDetectionBatch(batchName);
+        console.log(`[Cloud Detect] Created batch ${batchId}`);
+
+        let savedCount = 0;
+        for (const det of result.detections) {
+            // bbox is [x1, y1, x2, y2] normalized
+            const [x1, y1, x2, y2] = det.bbox;
+            DatabaseService.addDetection(
+                batchId,
+                det.image_id,
+                det.species,       // label
+                det.confidence,    // pred_conf (classification confidence)
+                det.confidence,    // detection_conf
+                [x1, y1, x2, y2],  // bbox
+                'cloud'            // source
+            );
+            savedCount++;
+        }
+
+        console.log(`[Cloud Detect] Saved ${savedCount} detections to batch ${batchId}`);
+        job.message = `Detected ${savedCount} objects`;
+        this.emitUpdate();
+
+        // Handle chained actions
+        if (chainToReid && species && (job.status as string) !== 'cancelled') {
+            job.message = 'Classification complete. Starting ReID...';
+            this.emitUpdate();
+            this.addJob('reid', { imageIds, species });
         }
     }
 

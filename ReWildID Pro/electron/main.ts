@@ -58,6 +58,7 @@ import { JobManager } from './jobs';
 import { executePythonCode } from './pythonExecutor';
 import { backupTable, listBackups, restoreBackup, deleteBackup } from './backup';
 import { getAWSConfig, loadSettings, saveSettings } from './settings';
+import { startResultsListener, initSQSClient } from './sqsClient';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -82,6 +83,15 @@ function createWindow(): void {
 
     // Initialize Job Manager
     JobManager.getInstance().setMainWindow(mainWindow);
+
+    // Start SQS results listener for cloud detection/reid
+    try {
+        initSQSClient();
+        startResultsListener();
+        console.log('[Main] SQS results listener started');
+    } catch (e) {
+        console.warn('[Main] Failed to start SQS listener (cloud features disabled):', e);
+    }
 
     // Grant media permissions (covers webcam, microphone, and screen recording)
     mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
