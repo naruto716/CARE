@@ -1063,7 +1063,7 @@ export class JobManager {
 
         let savedCount = 0;
         for (const det of result.detections) {
-            // bbox is [x1, y1, x2, y2] normalized
+            // bbox is [x1, y1, x2, y2] in pixels
             const [x1, y1, x2, y2] = det.bbox;
             DatabaseService.addDetection(
                 batchId,
