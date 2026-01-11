@@ -36,6 +36,45 @@ export interface DetectionResult {
     }>;
 }
 
+export interface ClusteringRequest {
+    job_id: string;
+    mode: 'clustering';
+    species: string;
+    images: Array<{
+        image_id: number;
+        s3_url: string;
+    }>;
+    existing_detections: Array<{
+        detection_id: number;
+        image_id: number;
+        bbox: [number, number, number, number];
+        species: string;
+    }>;
+}
+
+export interface ClusteringResult {
+    job_id: string;
+    status: 'completed' | 'failed';
+    error?: string;
+    new_detections: Array<{
+        detection_id: number;
+        image_id: number;
+        bbox: [number, number, number, number];
+    }>;
+    new_classifications: Array<{
+        detection_id: number;
+        species: string;
+        confidence: number;
+    }>;
+    clusters: Array<{
+        detection_id: number;
+        image_id: number;
+        cluster_id: number;
+    }>;
+    num_clusters: number;
+    num_noise: number;
+}
+
 /**
  * Initialize SQS client with credentials from settings.
  */
@@ -75,6 +114,25 @@ export async function sendDetectionRequest(request: DetectionRequest): Promise<v
 
     await sqsClient!.send(command);
     console.log(`[SQS] Sent detection request for job ${request.job_id}`);
+}
+
+/**
+ * Send a clustering (ReID) request to the request queue.
+ */
+export async function sendClusteringRequest(request: ClusteringRequest): Promise<void> {
+    if (!sqsClient) {
+        initSQSClient();
+    }
+
+    const command = new SendMessageCommand({
+        QueueUrl: REQUEST_QUEUE_URL,
+        MessageBody: JSON.stringify(request),
+        MessageGroupId: request.job_id,
+        MessageDeduplicationId: `${request.job_id}-clustering`
+    });
+
+    await sqsClient!.send(command);
+    console.log(`[SQS] Sent clustering request for job ${request.job_id}`);
 }
 
 /**

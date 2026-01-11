@@ -9,10 +9,13 @@ import { uploadImageToS3, initS3Client } from './s3';
 import { getAWSConfig } from './settings';
 import {
     sendDetectionRequest,
+    sendClusteringRequest,
     onJobResult,
     removeJobHandler,
     startResultsListener,
     DetectionResult,
+    ClusteringResult,
+    ClusteringRequest,
     initSQSClient
 } from './sqsClient';
 
@@ -190,7 +193,8 @@ export class JobManager {
                     await this.handleCloudDetectJob(job);
                     break;
                 case 'reid':
-                    await this.handleReidJob(job);
+                    // Use cloud ReID via SQS
+                    await this.handleCloudReidJob(job);
                     break;
                 default:
                     throw new Error(`Unknown job type: ${job.type}`);
@@ -1083,6 +1087,145 @@ export class JobManager {
             this.emitUpdate();
             this.addJob('reid', { imageIds, species });
         }
+    }
+
+    /**
+     * Handle ReID job using cloud worker via SQS.
+     */
+    private async handleCloudReidJob(job: Job): Promise<void> {
+        const { imageIds, species } = job.payload;
+
+        if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+            throw new Error('No image IDs provided for ReID');
+        }
+
+        // Initialize SQS client
+        initSQSClient();
+
+        // Get images with cloud URLs
+        const images = DatabaseService.getImagesByIds(imageIds);
+        const cloudImages = images.filter((img: any) => img.cloud_url);
+
+        if (cloudImages.length === 0) {
+            throw new Error('No images have cloud URLs. Please ensure images are uploaded to S3 first.');
+        }
+
+        // Get existing detections for these images
+        const allDetections = DatabaseService.getLatestDetectionsForImages(imageIds);
+        const speciesLower = species.toLowerCase();
+        const existingDetections = allDetections.filter(
+            (det: any) => det.label?.toLowerCase() === speciesLower
+        );
+
+        console.log(`[Cloud ReID] ${cloudImages.length} images, ${existingDetections.length} existing ${species} detections`);
+
+        job.message = `Sending ${cloudImages.length} images for ReID...`;
+        this.emitUpdate();
+
+        // Build SQS request - worker will detect missing images automatically
+        const request: ClusteringRequest = {
+            job_id: job.id,
+            mode: 'clustering',
+            species: species,
+            images: cloudImages.map((img: any) => ({
+                image_id: img.id,
+                s3_url: img.cloud_url
+            })),
+            existing_detections: existingDetections.map((det: any) => ({
+                detection_id: det.id,
+                image_id: det.image_id,
+                bbox: [det.x1, det.y1, det.x2, det.y2] as [number, number, number, number],
+                species: det.label
+            }))
+        };
+
+        await sendClusteringRequest(request);
+
+        job.message = 'Processing in cloud...';
+        this.emitUpdate();
+
+        // Wait for result via callback
+        const result = await new Promise<ClusteringResult>((resolve, reject) => {
+            // Timeout after 30 minutes for large ReID jobs
+            const timeout = setTimeout(() => {
+                removeJobHandler(job.id);
+                reject(new Error('Cloud ReID timed out'));
+            }, 30 * 60 * 1000);
+
+            onJobResult(job.id, (res: any) => {
+                clearTimeout(timeout);
+                resolve(res as ClusteringResult);
+            });
+        });
+
+        if (result.status === 'failed') {
+            throw new Error(result.error || 'Cloud ReID failed');
+        }
+
+        // Save new detections if any (from images that didn't have detections)
+        if (result.new_detections && result.new_detections.length > 0) {
+            job.message = 'Saving new detections...';
+            this.emitUpdate();
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const batchName = `ReID Detection ${dateStr} ${timeStr}`;
+
+            const batchId = DatabaseService.createDetectionBatch(batchName);
+
+            for (const det of result.new_detections) {
+                // Find classification for this detection
+                const clf = result.new_classifications?.find(c => c.detection_id === det.detection_id);
+                const [x1, y1, x2, y2] = det.bbox;
+                DatabaseService.addDetection(
+                    batchId,
+                    det.image_id,
+                    clf?.species || 'unknown',
+                    clf?.confidence || 0,
+                    clf?.confidence || 0,
+                    [x1, y1, x2, y2],
+                    'cloud'
+                );
+            }
+            console.log(`[Cloud ReID] Saved ${result.new_detections.length} new detections`);
+        }
+
+        // Save ReID results (clusters)
+        job.message = 'Saving ReID results...';
+        this.emitUpdate();
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const runName = `ReID ${species} ${dateStr} ${timeStr}`;
+
+        const runId = DatabaseService.createReidRun(runName, species);
+
+        // Group clusters by cluster_id to create individuals
+        const clusterMap = new Map<number, number[]>();
+        for (const cluster of result.clusters) {
+            if (cluster.cluster_id >= 0) { // Skip noise (-1)
+                if (!clusterMap.has(cluster.cluster_id)) {
+                    clusterMap.set(cluster.cluster_id, []);
+                }
+                clusterMap.get(cluster.cluster_id)!.push(cluster.detection_id);
+            }
+        }
+
+        // Create individuals and members
+        let individualCount = 0;
+        for (const [clusterId, detectionIds] of clusterMap) {
+            const individualId = DatabaseService.createReidIndividual(runId, `Individual ${clusterId + 1}`);
+            for (const detectionId of detectionIds) {
+                DatabaseService.addReidMember(individualId, detectionId);
+            }
+            individualCount++;
+        }
+
+        console.log(`[Cloud ReID] Saved ${result.clusters.length} cluster assignments, ${individualCount} individuals`);
+        job.message = `Found ${individualCount} individuals`;
+        this.emitUpdate();
     }
 
     // --- Job Persistence Helpers ---
