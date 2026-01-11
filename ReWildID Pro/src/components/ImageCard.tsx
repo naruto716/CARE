@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Typography, Card, CardMedia, Fade, useTheme } from '@mui/material';
+import { Box, Typography, Card, CardMedia, Fade, useTheme, Tooltip } from '@mui/material';
 import { FileDetails } from '../types/electron';
-import { CheckCircle, Circle } from '@phosphor-icons/react';
+import { CheckCircle, Circle, CloudCheck } from '@phosphor-icons/react';
 
 interface ImageCardProps {
     file: FileDetails;
     date: string;
     loadImage: (date: string, path: string) => Promise<void>;
     imageUrl?: string;
+    cloudUrl?: string; // New prop
     onClick: () => void;
     selectable?: boolean;
     selected?: boolean;
@@ -27,6 +28,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
     date,
     loadImage,
     imageUrl,
+    cloudUrl,
     onClick,
     selectable = false,
     selected = false,
@@ -55,7 +57,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
     // Long Press Logic
     const handlePointerDown = (e: React.PointerEvent) => {
         if (onPointerDown) onPointerDown(e);
-        
+
         if (onLongPress) {
             longPressTimer.current = setTimeout(() => {
                 onLongPress();
@@ -95,11 +97,11 @@ const ImageCard: React.FC<ImageCardProps> = ({
             const checkColor = theme.palette.mode === 'light' ? 'black' : 'white';
             const bgColor = theme.palette.mode === 'light' ? 'white' : 'black';
             return (
-                <Box sx={{ 
-                    bgcolor: bgColor, 
-                    borderRadius: '50%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Box sx={{
+                    bgcolor: bgColor,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
                     width: 24,
@@ -111,7 +113,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
         } else {
             // Unselected: Empty circle
             return (
-                 <Circle size={24} color="white" weight="regular" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))', opacity: 0.8 }} />
+                <Circle size={24} color="white" weight="regular" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))', opacity: 0.8 }} />
             );
         }
     };
@@ -161,7 +163,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
                                 WebkitUserDrag: 'none'
                             }}
                         />
-                        
+
                         {/* Light up overlay */}
                         {selected && (
                             <Box sx={{
@@ -182,27 +184,48 @@ const ImageCard: React.FC<ImageCardProps> = ({
                                 zIndex: 2,
                                 cursor: 'pointer'
                             }}
-                            onClick={(e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                onToggleSelection && onToggleSelection();
-                            }}
+                                onClick={(e: React.MouseEvent) => {
+                                    e.stopPropagation();
+                                    onToggleSelection && onToggleSelection();
+                                }}
                             >
                                 {getSelectionIcon()}
                             </Box>
                         )}
 
-                        {/* Badge (Species Label) - Top Right */}
-                        {badge && (
-                            <Box sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                zIndex: 2,
-                                pointerEvents: 'none'
-                            }}>
-                                {badge}
-                            </Box>
-                        )}
+                        {/* Top Right Container (Cloud Icon + Badge) */}
+                        <Box sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            zIndex: 2,
+                            display: 'flex',
+                            gap: 0.5,
+                            alignItems: 'center',
+                            pointerEvents: 'none'
+                        }}>
+                            {/* Cloud Icon (Hover only) */}
+                            {cloudUrl && (
+                                <Tooltip title="Uploaded to Cloud" placement="top">
+                                    <Box sx={{
+                                        opacity: 0,
+                                        transition: 'opacity 0.2s ease',
+                                        '.MuiCard-root:hover &': {
+                                            opacity: 1
+                                        },
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: 'white',
+                                        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
+                                    }}>
+                                        <CloudCheck size={20} weight="fill" />
+                                    </Box>
+                                </Tooltip>
+                            )}
+
+                            {/* Existing Badge */}
+                            {badge}
+                        </Box>
 
                         {/* Badge (ReID Name) - moves to top-right under species when selection mode */}
                         {badgeBottomLeft && (

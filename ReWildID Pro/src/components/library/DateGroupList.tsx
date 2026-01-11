@@ -691,6 +691,7 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                                     badgeBottomLeft={reidBadge}
                                     aspectRatio={aspectRatio}
                                     isPlaceholder={gridItemSize > 500 && !fullImageUrls[img.id]}
+                                    cloudUrl={img.cloud_url}
                                 />
                             </Box>
                         );
@@ -786,6 +787,7 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                                     badgeBottomLeft={reidBadge}
                                     aspectRatio={aspectRatio}
                                     isPlaceholder={gridItemSize > 500 && !fullImageUrls[img.id]}
+                                    cloudUrl={img.cloud_url}
                                 />
                             </Box>
                         );

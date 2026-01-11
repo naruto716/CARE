@@ -33,6 +33,7 @@ export interface DBImage {
     group_id: number;
     original_path: string;
     preview_path?: string;
+    cloud_url?: string; // S3 URL if image was uploaded to cloud
     date_added: number;
     group_name: string;
     group_created_at: number;
