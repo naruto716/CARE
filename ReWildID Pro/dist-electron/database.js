@@ -226,7 +226,7 @@ exports.DatabaseService = {
     },
     getImages: (filter) => {
         let query = `
-            SELECT images.*, groups.name as group_name, groups.created_at as group_created_at
+            SELECT images.*, groups.name as group_name, groups.created_at as group_created_at, images.cloud_url
             FROM images
             JOIN groups ON images.group_id = groups.id
             WHERE 1=1

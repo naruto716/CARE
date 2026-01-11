@@ -155,3 +155,4 @@ readme_media/detection_results.json
 .DS_Store
 data
 temp
+test_images/

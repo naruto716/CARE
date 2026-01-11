@@ -10,6 +10,7 @@ const jobs_1 = require("./jobs");
 const pythonExecutor_1 = require("./pythonExecutor");
 const backup_1 = require("./backup");
 const settings_1 = require("./settings");
+const sqsClient_1 = require("./sqsClient");
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     electron_1.app.quit();
@@ -30,6 +31,15 @@ function createWindow() {
     });
     // Initialize Job Manager
     jobs_1.JobManager.getInstance().setMainWindow(mainWindow);
+    // Start SQS results listener for cloud detection/reid
+    try {
+        (0, sqsClient_1.initSQSClient)();
+        (0, sqsClient_1.startResultsListener)();
+        console.log('[Main] SQS results listener started');
+    }
+    catch (e) {
+        console.warn('[Main] Failed to start SQS listener (cloud features disabled):', e);
+    }
     // Grant media permissions (covers webcam, microphone, and screen recording)
     mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
         if (permission === 'media') {

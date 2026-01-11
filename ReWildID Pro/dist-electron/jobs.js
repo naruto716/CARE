@@ -46,6 +46,7 @@ const os_1 = __importDefault(require("os"));
 const python_1 = require("./python");
 const s3_1 = require("./s3");
 const settings_1 = require("./settings");
+const sqsClient_1 = require("./sqsClient");
 function getAppDataDir() {
     if (process.platform === 'win32') {
         let appDataPath = process.env.APPDATA || process.env.LOCALAPPDATA;
@@ -188,10 +189,12 @@ class JobManager {
                     await this.handleThumbnailJob(job);
                     break;
                 case 'detect':
-                    await this.handleDetectJob(job);
+                    // Use cloud detection via SQS
+                    await this.handleCloudDetectJob(job);
                     break;
                 case 'reid':
-                    await this.handleReidJob(job);
+                    // Use cloud ReID via SQS
+                    await this.handleCloudReidJob(job);
                     break;
                 default:
                     throw new Error(`Unknown job type: ${job.type}`);
@@ -872,6 +875,191 @@ class JobManager {
             // Cleanup
             await fs_extra_1.default.remove(manifestPath).catch(() => { });
         }
+    }
+    /**
+     * Handle detection via cloud SQS pipeline.
+     * Sends request to worker and waits for result.
+     */
+    async handleCloudDetectJob(job) {
+        const { imageIds, chainToReid, species } = job.payload;
+        if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+            throw new Error('No image IDs provided for detection');
+        }
+        // Initialize SQS client
+        (0, sqsClient_1.initSQSClient)();
+        // Get images from database to fetch cloud_urls
+        const images = database_1.DatabaseService.getImagesByIds(imageIds);
+        // Filter to only images that have cloud_url
+        const cloudImages = images.filter((img) => img.cloud_url);
+        if (cloudImages.length === 0) {
+            throw new Error('No images have cloud URLs. Please ensure images are uploaded to S3 first.');
+        }
+        console.log(`[Cloud Detect] Processing ${cloudImages.length} images with cloud URLs`);
+        // Build SQS request - use s3_url field name (api_worker.py expects this)
+        const sqsImages = cloudImages.map((img) => ({
+            image_id: img.id,
+            s3_url: img.cloud_url
+        }));
+        job.message = 'Sending to cloud...';
+        this.emitUpdate();
+        // Send request to SQS
+        await (0, sqsClient_1.sendDetectionRequest)({
+            job_id: job.id,
+            mode: 'detection',
+            images: sqsImages
+        });
+        job.message = 'Processing in cloud...';
+        this.emitUpdate();
+        // Wait for result via callback
+        const result = await new Promise((resolve, reject) => {
+            // Timeout after 15 minutes
+            const timeout = setTimeout(() => {
+                (0, sqsClient_1.removeJobHandler)(job.id);
+                reject(new Error('Cloud detection timed out'));
+            }, 15 * 60 * 1000);
+            (0, sqsClient_1.onJobResult)(job.id, (res) => {
+                clearTimeout(timeout);
+                resolve(res);
+            });
+        });
+        if (result.status === 'failed') {
+            throw new Error(result.error || 'Cloud detection failed');
+        }
+        // Save results to database
+        job.message = 'Saving results...';
+        this.emitUpdate();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const batchName = `Detection ${dateStr} ${timeStr}`;
+        const batchId = database_1.DatabaseService.createDetectionBatch(batchName);
+        console.log(`[Cloud Detect] Created batch ${batchId}`);
+        let savedCount = 0;
+        for (const det of result.detections) {
+            // bbox is [x1, y1, x2, y2] normalized
+            const [x1, y1, x2, y2] = det.bbox;
+            database_1.DatabaseService.addDetection(batchId, det.image_id, det.species, // label
+            det.confidence, // pred_conf (classification confidence)
+            det.confidence, // detection_conf
+            [x1, y1, x2, y2], // bbox
+            'cloud' // source
+            );
+            savedCount++;
+        }
+        console.log(`[Cloud Detect] Saved ${savedCount} detections to batch ${batchId}`);
+        job.message = `Detected ${savedCount} objects`;
+        this.emitUpdate();
+        // Handle chained actions
+        if (chainToReid && species && job.status !== 'cancelled') {
+            job.message = 'Classification complete. Starting ReID...';
+            this.emitUpdate();
+            this.addJob('reid', { imageIds, species });
+        }
+    }
+    /**
+     * Handle ReID job using cloud worker via SQS.
+     */
+    async handleCloudReidJob(job) {
+        const { imageIds, species } = job.payload;
+        if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+            throw new Error('No image IDs provided for ReID');
+        }
+        // Initialize SQS client
+        (0, sqsClient_1.initSQSClient)();
+        // Get images with cloud URLs
+        const images = database_1.DatabaseService.getImagesByIds(imageIds);
+        const cloudImages = images.filter((img) => img.cloud_url);
+        if (cloudImages.length === 0) {
+            throw new Error('No images have cloud URLs. Please ensure images are uploaded to S3 first.');
+        }
+        // Get existing detections for these images
+        const allDetections = database_1.DatabaseService.getLatestDetectionsForImages(imageIds);
+        const speciesLower = species.toLowerCase();
+        const existingDetections = allDetections.filter((det) => det.label?.toLowerCase() === speciesLower);
+        console.log(`[Cloud ReID] ${cloudImages.length} images, ${existingDetections.length} existing ${species} detections`);
+        job.message = `Sending ${cloudImages.length} images for ReID...`;
+        this.emitUpdate();
+        // Build SQS request - worker will detect missing images automatically
+        const request = {
+            job_id: job.id,
+            mode: 'clustering',
+            species: species,
+            images: cloudImages.map((img) => ({
+                image_id: img.id,
+                s3_url: img.cloud_url
+            })),
+            existing_detections: existingDetections.map((det) => ({
+                detection_id: det.id,
+                image_id: det.image_id,
+                bbox: [det.x1, det.y1, det.x2, det.y2],
+                species: det.label
+            }))
+        };
+        await (0, sqsClient_1.sendClusteringRequest)(request);
+        job.message = 'Processing in cloud...';
+        this.emitUpdate();
+        // Wait for result via callback
+        const result = await new Promise((resolve, reject) => {
+            // Timeout after 30 minutes for large ReID jobs
+            const timeout = setTimeout(() => {
+                (0, sqsClient_1.removeJobHandler)(job.id);
+                reject(new Error('Cloud ReID timed out'));
+            }, 30 * 60 * 1000);
+            (0, sqsClient_1.onJobResult)(job.id, (res) => {
+                clearTimeout(timeout);
+                resolve(res);
+            });
+        });
+        if (result.status === 'failed') {
+            throw new Error(result.error || 'Cloud ReID failed');
+        }
+        // Save new detections if any (from images that didn't have detections)
+        if (result.new_detections && result.new_detections.length > 0) {
+            job.message = 'Saving new detections...';
+            this.emitUpdate();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const batchName = `ReID Detection ${dateStr} ${timeStr}`;
+            const batchId = database_1.DatabaseService.createDetectionBatch(batchName);
+            for (const det of result.new_detections) {
+                // Find classification for this detection
+                const clf = result.new_classifications?.find(c => c.detection_id === det.detection_id);
+                const [x1, y1, x2, y2] = det.bbox;
+                database_1.DatabaseService.addDetection(batchId, det.image_id, clf?.species || 'unknown', clf?.confidence || 0, clf?.confidence || 0, [x1, y1, x2, y2], 'cloud');
+            }
+            console.log(`[Cloud ReID] Saved ${result.new_detections.length} new detections`);
+        }
+        // Save ReID results (clusters)
+        job.message = 'Saving ReID results...';
+        this.emitUpdate();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const runName = `ReID ${species} ${dateStr} ${timeStr}`;
+        const runId = database_1.DatabaseService.createReidRun(runName, species);
+        // Group clusters by cluster_id to create individuals
+        const clusterMap = new Map();
+        for (const cluster of result.clusters) {
+            if (cluster.cluster_id >= 0) { // Skip noise (-1)
+                if (!clusterMap.has(cluster.cluster_id)) {
+                    clusterMap.set(cluster.cluster_id, []);
+                }
+                clusterMap.get(cluster.cluster_id).push(cluster.detection_id);
+            }
+        }
+        // Create individuals and members
+        let individualCount = 0;
+        for (const [clusterId, detectionIds] of clusterMap) {
+            const individualId = database_1.DatabaseService.createReidIndividual(runId, `Individual ${clusterId + 1}`);
+            for (const detectionId of detectionIds) {
+                database_1.DatabaseService.addReidMember(individualId, detectionId);
+            }
+            individualCount++;
+        }
+        console.log(`[Cloud ReID] Saved ${result.clusters.length} cluster assignments, ${individualCount} individuals`);
+        job.message = `Found ${individualCount} individuals`;
+        this.emitUpdate();
     }
     // --- Job Persistence Helpers ---
     saveJobToDb(job) {
