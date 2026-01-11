@@ -57,6 +57,7 @@ import {
 import { JobManager } from './jobs';
 import { executePythonCode } from './pythonExecutor';
 import { backupTable, listBackups, restoreBackup, deleteBackup } from './backup';
+import { getAWSConfig, loadSettings, saveSettings } from './settings';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -271,6 +272,18 @@ ipcMain.handle('copyImageToClipboard', (_, dataUrl: string) => {
         console.error('Failed to copy image to clipboard:', error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+});
+
+// AWS Settings
+ipcMain.handle('getAWSSettings', () => {
+    return getAWSConfig();
+});
+
+ipcMain.handle('saveAWSSettings', (_, settings: { accessKeyId?: string; secretAccessKey?: string; region?: string; bucket?: string }) => {
+    const current = loadSettings();
+    current.aws = { ...current.aws, ...settings };
+    saveSettings(current);
+    return { success: true };
 });
 
 

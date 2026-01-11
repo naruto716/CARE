@@ -5,6 +5,8 @@ import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
 import { spawnPythonSubprocess, terminateSubprocess, setSubProcess } from './python';
+import { uploadImageToS3, initS3Client } from './s3';
+import { getAWSConfig } from './settings';
 
 function getAppDataDir() {
     if (process.platform === 'win32') {
@@ -272,6 +274,9 @@ export class JobManager {
     private async handleImportJob(job: Job) {
         const { filePaths, groupName, afterAction, species, processedPaths = [] } = job.payload;
 
+        // Initialize S3 client with credentials from settings
+        initS3Client(getAWSConfig());
+
         // Track imported image IDs for chained actions
         const importedImageIds: number[] = [];
 
@@ -365,8 +370,18 @@ export class JobManager {
                         console.log(`[Import] Copied from removable: ${filePath} -> ${targetPath}`);
                     }
 
-                    // Add to DB with final path
-                    const imageId = DatabaseService.addImage(groupId, finalPath);
+                    // Upload to S3 cloud storage
+                    let cloudUrl: string | undefined;
+                    try {
+                        cloudUrl = await uploadImageToS3(finalPath, targetGroupName);
+                        console.log(`[Import] Uploaded to cloud: ${cloudUrl}`);
+                    } catch (s3Error) {
+                        console.warn(`[Import] S3 upload failed (continuing without cloud URL):`, s3Error);
+                        // Continue without cloud_url - local storage still works
+                    }
+
+                    // Add to DB with final path and cloud URL
+                    const imageId = DatabaseService.addImage(groupId, finalPath, undefined, cloudUrl);
                     importedImageIds.push(imageId);
 
                     // Generate Thumbnail

@@ -146,6 +146,10 @@ const initSchema = () => {
     if (!columns.some(col => col.name === 'metadata')) {
         db.exec('ALTER TABLE images ADD COLUMN metadata TEXT');
     }
+    // Migration: Add cloud_url column if it doesn't exist
+    if (!columns.some(col => col.name === 'cloud_url')) {
+        db.exec('ALTER TABLE images ADD COLUMN cloud_url TEXT');
+    }
 };
 
 initSchema();
@@ -161,6 +165,7 @@ export interface Image {
     id: number;
     group_id: number;
     original_path: string;
+    cloud_url?: string;         // S3 URL for cloud processing
     preview_path?: string;
     date_added: number;
     metadata?: string; // JSON string of Record<string, string>
@@ -301,9 +306,9 @@ export const DatabaseService = {
 
     // --- Images ---
 
-    addImage: (groupId: number, originalPath: string, previewPath?: string): number => {
-        const stmt = db.prepare('INSERT INTO images (group_id, original_path, preview_path, date_added) VALUES (?, ?, ?, ?)');
-        const info = stmt.run(groupId, originalPath, previewPath || null, Date.now());
+    addImage: (groupId: number, originalPath: string, previewPath?: string, cloudUrl?: string): number => {
+        const stmt = db.prepare('INSERT INTO images (group_id, original_path, preview_path, cloud_url, date_added) VALUES (?, ?, ?, ?, ?)');
+        const info = stmt.run(groupId, originalPath, previewPath || null, cloudUrl || null, Date.now());
         return info.lastInsertRowid as number;
     },
 

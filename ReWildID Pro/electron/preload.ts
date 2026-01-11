@@ -111,4 +111,9 @@ contextBridge.exposeInMainWorld('api', {
 
     // Clipboard (for AI Agent generated images)
     copyImageToClipboard: (dataUrl: string) => ipcRenderer.invoke('copyImageToClipboard', dataUrl),
+
+    // AWS Settings
+    getAWSSettings: () => ipcRenderer.invoke('getAWSSettings'),
+    saveAWSSettings: (settings: { accessKeyId?: string; secretAccessKey?: string; region?: string; bucket?: string }) =>
+        ipcRenderer.invoke('saveAWSSettings', settings),
 });

@@ -52,6 +52,7 @@ import {
     OpenAiLogo,
     Key,
     Warning,
+    Cloud,
 } from '@phosphor-icons/react';
 import StyledSwitch from '../../components/StyledSwitch';
 import { resetAllTours } from '../../components/OnboardingTour';
@@ -276,6 +277,29 @@ const SettingsPage: React.FC = () => {
     // Privacy agreement dialog state
     const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
+
+    // AWS Settings
+    const [awsAccessKey, setAwsAccessKey] = useState('');
+    const [awsSecretKey, setAwsSecretKey] = useState('');
+    const [awsRegion, setAwsRegion] = useState('ap-southeast-2');
+    const [awsBucket, setAwsBucket] = useState('fish-reid-images');
+    const [showAwsSecretKey, setShowAwsSecretKey] = useState(false);
+
+    // Load AWS settings on mount
+    useEffect(() => {
+        (window as any).api.getAWSSettings().then((settings: any) => {
+            if (settings) {
+                setAwsAccessKey(settings.accessKeyId || '');
+                setAwsSecretKey(settings.secretAccessKey || '');
+                setAwsRegion(settings.region || 'ap-southeast-2');
+                setAwsBucket(settings.bucket || 'fish-reid-images');
+            }
+        });
+    }, []);
+
+    const saveAWSSetting = (key: string, value: string) => {
+        (window as any).api.saveAWSSettings({ [key]: value });
+    };
 
     const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newKey = e.target.value;
@@ -757,6 +781,173 @@ const SettingsPage: React.FC = () => {
                                     </Box>
                                 </>
                             )}
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
+
+                {/* AWS Cloud Storage Settings */}
+                <Accordion
+                    disableGutters
+                    square
+                    elevation={0}
+                    sx={{
+                        mb: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 2.5,
+                        '&:before': { display: 'none' },
+                        overflow: 'hidden',
+                        bgcolor: hasGradient
+                            ? (theme.palette.mode === 'dark' ? 'rgba(30, 30, 36, 0.75)' : 'rgba(247, 249, 251, 0.75)')
+                            : 'background.paper',
+                        backdropFilter: hasGradient ? 'blur(12px)' : 'none',
+                        WebkitBackdropFilter: hasGradient ? 'blur(12px)' : 'none',
+                    }}
+                >
+                    <AccordionSummary
+                        expandIcon={<CaretDown size={20} />}
+                        sx={{
+                            px: 2,
+                            minHeight: '56px',
+                            '& .MuiAccordionSummary-content': {
+                                my: '12px'
+                            },
+                            '&.Mui-expanded': {
+                                minHeight: '56px',
+                                borderBottom: `1px solid ${theme.palette.divider}`
+                            }
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', pr: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Cloud size={20} />
+                                <Typography variant="h6" fontWeight="600">
+                                    AWS Cloud Storage
+                                </Typography>
+                            </Box>
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ mt: 0, lineHeight: 1.3, ml: 3.5 }}
+                            >
+                                Configure S3 bucket for image uploads (optional - falls back to system credentials)
+                            </Typography>
+                        </Box>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ pt: 2, px: 2, pb: 2 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {/* Access Key ID */}
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                <Key size={24} style={{ marginTop: 8 }} color={theme.palette.text.secondary} />
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+                                        Access Key ID
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                                        Leave empty to use system credentials
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={awsAccessKey}
+                                        onChange={(e) => {
+                                            setAwsAccessKey(e.target.value);
+                                            saveAWSSetting('accessKeyId', e.target.value);
+                                        }}
+                                        placeholder="AKIAIOSFODNN7EXAMPLE"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                            {/* Secret Access Key */}
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                <Box sx={{ width: 24 }} />
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+                                        Secret Access Key
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        type={showAwsSecretKey ? 'text' : 'password'}
+                                        value={awsSecretKey}
+                                        onChange={(e) => {
+                                            setAwsSecretKey(e.target.value);
+                                            saveAWSSetting('secretAccessKey', e.target.value);
+                                        }}
+                                        placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => setShowAwsSecretKey(!showAwsSecretKey)}
+                                                        edge="end"
+                                                    >
+                                                        <Eye size={18} weight={showAwsSecretKey ? 'fill' : 'regular'} />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                            {/* Region */}
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                <Box sx={{ width: 24 }} />
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+                                        Region
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={awsRegion}
+                                        onChange={(e) => {
+                                            setAwsRegion(e.target.value);
+                                            saveAWSSetting('region', e.target.value);
+                                        }}
+                                        placeholder="ap-southeast-2"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                            {/* Bucket */}
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                <Box sx={{ width: 24 }} />
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+                                        S3 Bucket
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        value={awsBucket}
+                                        onChange={(e) => {
+                                            setAwsBucket(e.target.value);
+                                            saveAWSSetting('bucket', e.target.value);
+                                        }}
+                                        placeholder="my-bucket-name"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
                         </Box>
                     </AccordionDetails>
                 </Accordion>
