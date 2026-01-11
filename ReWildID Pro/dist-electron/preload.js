@@ -97,4 +97,7 @@ electron_1.contextBridge.exposeInMainWorld('api', {
     deleteBackup: (backupPath) => electron_1.ipcRenderer.invoke('deleteBackup', backupPath),
     // Clipboard (for AI Agent generated images)
     copyImageToClipboard: (dataUrl) => electron_1.ipcRenderer.invoke('copyImageToClipboard', dataUrl),
+    // AWS Settings
+    getAWSSettings: () => electron_1.ipcRenderer.invoke('getAWSSettings'),
+    saveAWSSettings: (settings) => electron_1.ipcRenderer.invoke('saveAWSSettings', settings),
 });

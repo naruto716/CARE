@@ -8,7 +8,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { PaperPlaneRight, Stop, Image as ImageIcon, X, Plus } from '@phosphor-icons/react';
+import { PaperPlaneRight, Stop, X, Plus } from '@phosphor-icons/react';
 import AgentImageModal from './AgentImageModal';
 
 interface ImageFile {
@@ -201,10 +201,6 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
             event.preventDefault();
             handleSubmit();
         }
-    };
-
-    const handleImageButtonClick = () => {
-        fileInputRef.current?.click();
     };
 
     const isUploading = images.some(i => i.status === 'loading');

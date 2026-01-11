@@ -44,6 +44,8 @@ const path_1 = __importDefault(require("path"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
 const os_1 = __importDefault(require("os"));
 const python_1 = require("./python");
+const s3_1 = require("./s3");
+const settings_1 = require("./settings");
 function getAppDataDir() {
     if (process.platform === 'win32') {
         let appDataPath = process.env.APPDATA || process.env.LOCALAPPDATA;
@@ -280,6 +282,8 @@ class JobManager {
     }
     async handleImportJob(job) {
         const { filePaths, groupName, afterAction, species, processedPaths = [] } = job.payload;
+        // Initialize S3 client with credentials from settings
+        (0, s3_1.initS3Client)((0, settings_1.getAWSConfig)());
         // Track imported image IDs for chained actions
         const importedImageIds = [];
         // Track processed paths for resume capability
@@ -357,8 +361,18 @@ class JobManager {
                         finalPath = targetPath;
                         console.log(`[Import] Copied from removable: ${filePath} -> ${targetPath}`);
                     }
-                    // Add to DB with final path
-                    const imageId = database_1.DatabaseService.addImage(groupId, finalPath);
+                    // Upload to S3 cloud storage
+                    let cloudUrl;
+                    try {
+                        cloudUrl = await (0, s3_1.uploadImageToS3)(finalPath, targetGroupName);
+                        console.log(`[Import] Uploaded to cloud: ${cloudUrl}`);
+                    }
+                    catch (s3Error) {
+                        console.warn(`[Import] S3 upload failed (continuing without cloud URL):`, s3Error);
+                        // Continue without cloud_url - local storage still works
+                    }
+                    // Add to DB with final path and cloud URL
+                    const imageId = database_1.DatabaseService.addImage(groupId, finalPath, undefined, cloudUrl);
                     importedImageIds.push(imageId);
                     // Generate Thumbnail
                     await this.generateThumbnail(imageId, finalPath);

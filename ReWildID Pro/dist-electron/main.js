@@ -9,6 +9,7 @@ const controller_1 = require("./controller");
 const jobs_1 = require("./jobs");
 const pythonExecutor_1 = require("./pythonExecutor");
 const backup_1 = require("./backup");
+const settings_1 = require("./settings");
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     electron_1.app.quit();
@@ -196,6 +197,16 @@ electron_1.ipcMain.handle('copyImageToClipboard', (_, dataUrl) => {
         console.error('Failed to copy image to clipboard:', error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+});
+// AWS Settings
+electron_1.ipcMain.handle('getAWSSettings', () => {
+    return (0, settings_1.getAWSConfig)();
+});
+electron_1.ipcMain.handle('saveAWSSettings', (_, settings) => {
+    const current = (0, settings_1.loadSettings)();
+    current.aws = { ...current.aws, ...settings };
+    (0, settings_1.saveSettings)(current);
+    return { success: true };
 });
 electron_1.app.on('ready', () => {
     createWindow();
