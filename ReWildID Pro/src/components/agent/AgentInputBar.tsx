@@ -317,7 +317,7 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
                                         }}
                                     >
                                         <Typography variant="caption" sx={{ color: 'white', fontSize: '0.6rem' }}>
-                                            Error
+                                            错误
                                         </Typography>
                                     </Box>
                                 )}
@@ -349,7 +349,7 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
                 {/* Input Row */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     {/* New Chat Button */}
-                    <Tooltip title="New Chat">
+                    <Tooltip title="新建聊天">
                         <span>
                             <IconButton
                                 onClick={onNewChat}
@@ -374,7 +374,7 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
                         inputRef={inputRef}
                         fullWidth
                         variant="standard"
-                        placeholder={images.length > 0 ? "Add a message about the image(s)..." : "Ask anything..."}
+                        placeholder={images.length > 0 ? "添加关于图片的消息..." : "提问任何问题..."}
                         value={inputValue}
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
@@ -403,7 +403,7 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
                     {/* Send/Stop Button */}
                     {isLoading ? (
                         onStopGeneration ? (
-                            <Tooltip title="Stop">
+                            <Tooltip title="停止">
                                 <IconButton
                                     onClick={onStopGeneration}
                                     size="small"
@@ -423,7 +423,7 @@ const AgentInputBar: React.FC<AgentInputBarProps> = ({
                             <CircularProgress size={22} sx={{ mx: 1 }} />
                         )
                     ) : (
-                        <Tooltip title="Send">
+                        <Tooltip title="发送">
                             <span>
                                 <IconButton
                                     onClick={handleSubmit}

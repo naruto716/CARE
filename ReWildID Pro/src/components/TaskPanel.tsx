@@ -50,7 +50,7 @@ const TaskPanel: React.FC = () => {
     if (jobs.length === 0) {
         return (
             <Box sx={{ p: 3, textAlign: 'center', opacity: 0.6 }}>
-                <Typography variant="body2">No active tasks</Typography>
+                <Typography variant="body2">无活动任务</Typography>
             </Box>
         );
     }
@@ -109,7 +109,7 @@ const TaskPanel: React.FC = () => {
                                     <Box>
                                         {job.status === 'completed' && (
                                             <Chip
-                                                label="Done"
+                                                label="完成"
                                                 size="small"
                                                 variant="filled"
                                                 sx={{
@@ -123,7 +123,7 @@ const TaskPanel: React.FC = () => {
                                         )}
                                         {job.status === 'failed' && (
                                             <Chip
-                                                label="Failed"
+                                                label="失败"
                                                 size="small"
                                                 color="error"
                                                 sx={{ height: 16, fontSize: '0.65rem' }}
@@ -131,7 +131,7 @@ const TaskPanel: React.FC = () => {
                                         )}
                                         {job.status === 'cancelled' && (
                                             <Chip
-                                                label="Cancelled"
+                                                label="已取消"
                                                 size="small"
                                                 sx={{
                                                     height: 16,
@@ -203,7 +203,7 @@ const TaskPanel: React.FC = () => {
                                                 }
                                             }}
                                         >
-                                            View
+                                            查看
                                         </Button>
                                     )}
                                     {(job.status === 'failed' || job.status === 'cancelled') &&
@@ -225,7 +225,7 @@ const TaskPanel: React.FC = () => {
                                                     }
                                                 }}
                                             >
-                                                Retry
+                                                重试
                                             </Button>
                                         )}
                                 </Box>

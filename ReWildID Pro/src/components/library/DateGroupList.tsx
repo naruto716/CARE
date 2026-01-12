@@ -7,6 +7,7 @@ import { DBImage } from '../../types/electron';
 import { DateSection, GroupData } from '../../types/library';
 import AiModeButton from '../AiModeButton';
 import ImageCard from '../ImageCard';
+import { translateSpecies } from '../../constants/species';
 
 export interface DateGroupListHandle {
     scrollToIndex: (index: number) => void;
@@ -159,9 +160,9 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                                     const latestBatchId = sortedDets[0]?.batch_id;
                                     const latestDets = sortedDets.filter(d => d.batch_id === latestBatchId);
                                     const species = latestDets.find(d => d.label && d.label !== 'blank')?.label;
-                                    key = species || 'Unclassified';
+                                    key = species ? translateSpecies(species) : '未分类';
                                 } else {
-                                    key = 'Unclassified';
+                                    key = '未分类';
                                 }
                             } else {
                                 // Use most recent ReID run
@@ -170,10 +171,10 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                                     const latestRunId = sortedReid[0]?.runId;
                                     const latestReid = sortedReid.filter(r => r.runId === latestRunId);
                                     const reid = latestReid[0];
-                                    key = reid?.individualDisplayName || 'Unidentified';
+                                    key = reid?.individualDisplayName || '未识别';
                                     color = reid?.individualColor;
                                 } else {
-                                    key = 'Unidentified';
+                                    key = '未识别';
                                 }
                             }
 
@@ -408,7 +409,7 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
         const month = dateStr.substring(4, 6);
         const day = dateStr.substring(6, 8);
         const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        return date.toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     // Calculate row height for consistent sizing (prevents scroll jumps)
@@ -453,7 +454,7 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                         <Typography variant="caption" color="text.secondary" sx={{ bgcolor: theme.palette.action.selected, px: 1, py: 0.5, borderRadius: 1 }}>
                             {group.images.length}
                         </Typography>
-                        <Tooltip title="Select all in group">
+                        <Tooltip title="选择组内所有图片">
                             <IconButton
                                 className="group-select-button"
                                 size="small"
@@ -477,8 +478,8 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                             <AiModeButton
                                 data-tour="library-analyse"
                                 text={group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length > 0
-                                    ? `Analyse (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
-                                    : "Analyse"}
+                                    ? `分析 (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
+                                    : "分析"}
                                 onClick={() => {
                                     setAnalyseMenuGroup(group);
                                     setAnalyseMenuOpen(true);
@@ -520,8 +521,8 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                         <>
                             <AiModeButton
                                 text={group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length > 0
-                                    ? `ReID (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
-                                    : "ReID"}
+                                    ? `个体鉴别 (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
+                                    : "个体鉴别"}
                                 onClick={() => {
                                     setAnalyseMenuGroup(group);
                                     setAnalyseMenuOpen(true);
@@ -549,15 +550,15 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                                             : analyseMenuGroup.images.length
                                     }
                                     reidOnly={true}
-                                    title="Re-identification"
+                                    title="个体鉴别"
                                 />
                             )}
                         </>
                     ) : (
                         <AiModeButton
                             text={group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length > 0
-                                ? `Detect (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
-                                : "Detect"}
+                                ? `检测 (${group.images.filter((img: DBImage) => selectedImageIds.has(img.id)).length})`
+                                : "检测"}
                             onClick={() => {
                                 const selectedInGroup = group.images.filter((img: DBImage) => selectedImageIds.has(img.id));
                                 handleDetect(selectedInGroup.length > 0 ? selectedInGroup : group.images);
@@ -625,9 +626,9 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                             const latestDetections = sortedDetections.filter(d => d.batch_id === latestBatchId);
                             const labels = Array.from(new Set(latestDetections.map((d: { label: string }) => d.label).filter((l: string) => l && l !== 'blank')));
                             if (labels.length === 0) {
-                                speciesBadge = <Chip label="Empty" size="small" sx={{ bgcolor: 'rgba(0,0,0,0.5)', color: 'white', height: 20, fontSize: '0.65rem', fontWeight: 600, backdropFilter: 'blur(4px)' }} />;
+                                speciesBadge = <Chip label="未分类" size="small" sx={{ bgcolor: 'rgba(0,0,0,0.5)', color: 'white', height: 20, fontSize: '0.65rem', fontWeight: 600, backdropFilter: 'blur(4px)' }} />;
                             } else {
-                                const text = labels.length > 1 ? `${labels[0]} +${labels.length - 1}` : labels[0];
+                                const text = labels.length > 1 ? `${translateSpecies(labels[0])} +${labels.length - 1}` : translateSpecies(labels[0]);
                                 speciesBadge = <Chip label={text} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: '#000', height: 20, fontSize: '0.65rem', fontWeight: 600 }} />;
                             }
                         }
@@ -719,9 +720,9 @@ export const DateGroupList = forwardRef<DateGroupListHandle, DateGroupListProps>
                             const latestDetections = sortedDetections.filter(d => d.batch_id === latestBatchId);
                             const labels = Array.from(new Set(latestDetections.map((d: { label: string }) => d.label).filter((l: string) => l && l !== 'blank')));
                             if (labels.length === 0) {
-                                speciesBadge = <Chip label="Empty" size="small" sx={{ bgcolor: 'rgba(0,0,0,0.5)', color: 'white', height: 20, fontSize: '0.65rem', fontWeight: 600, backdropFilter: 'blur(4px)' }} />;
+                                speciesBadge = <Chip label="未分类" size="small" sx={{ bgcolor: 'rgba(0,0,0,0.5)', color: 'white', height: 20, fontSize: '0.65rem', fontWeight: 600, backdropFilter: 'blur(4px)' }} />;
                             } else {
-                                const text = labels.length > 1 ? `${labels[0]} +${labels.length - 1}` : labels[0];
+                                const text = labels.length > 1 ? `${translateSpecies(labels[0])} +${labels.length - 1}` : translateSpecies(labels[0]);
                                 speciesBadge = <Chip label={text} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: '#000', height: 20, fontSize: '0.65rem', fontWeight: 600 }} />;
                             }
                         }

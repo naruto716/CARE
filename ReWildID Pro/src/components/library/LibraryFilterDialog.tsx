@@ -177,8 +177,8 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                     alignItems: 'center'
                 }}>
                     <Box>
-                        <Typography variant="h5" fontWeight="700" sx={{ lineHeight: 1.2 }}>Filter Library</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Select a date and groups to filter your view (Legacy Support)</Typography>
+                        <Typography variant="h5" fontWeight="700" sx={{ lineHeight: 1.2 }}>筛选图库</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>选择日期和组来筛选您的视图（旧版支持）</Typography>
                     </Box>
                     <IconButton onClick={onClose} size="small" sx={{ color: 'text.secondary', bgcolor: theme.palette.action.hover }}><X /></IconButton>
                 </Box>
@@ -196,7 +196,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                         mb: 2
                     }}>
                         <Typography variant="caption" fontWeight="700" color="text.secondary" sx={{ p: 2, pb: 1, display: 'block', letterSpacing: 1 }}>
-                            DATES
+                            日期
                         </Typography>
                         <List disablePadding sx={{ overflowY: 'auto', flex: 1, px: 1, pb: 1 }}>
                             {dateSections.map(section => {
@@ -231,7 +231,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                                                 {isSelected && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'primary.main' }} />}
                                             </Box>
                                             <Typography variant="caption" color={isSelected ? alpha(theme.palette.primary.main, 0.8) : "text.secondary"}>
-                                                {section.groups.reduce((acc, g) => acc + g.images.length, 0)} images
+                                                {section.groups.reduce((acc, g) => acc + g.images.length, 0)} 张图片
                                             </Typography>
                                         </Box>
                                     </ListItemButton>
@@ -252,7 +252,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                             px: 1
                         }}>
                             <Typography variant="caption" fontWeight="700" color="text.secondary" sx={{ letterSpacing: 1 }}>
-                                GROUPS
+                                组
                             </Typography>
 
                             {selectedDate && (
@@ -264,7 +264,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                                     underline="hover"
                                     sx={{ cursor: 'pointer', color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
                                 >
-                                    {isAllGroupsSelected ? "Deselect All" : "Select All"}
+                                    {isAllGroupsSelected ? "取消全选" : "全选"}
                                 </Link>
                             )}
                         </Box>
@@ -272,12 +272,12 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                         <Box sx={{ flex: 1, overflowY: 'auto', borderRadius: 4 }}>
                             {!selectedDate ? (
                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.4 }}>
-                                    <Typography variant="body1" fontWeight="500">No date selected</Typography>
-                                    <Typography variant="caption">Select a date from the left to view groups</Typography>
+                                    <Typography variant="body1" fontWeight="500">未选择日期</Typography>
+                                    <Typography variant="caption">从左侧选择日期以查看组</Typography>
                                 </Box>
                             ) : currentGroups.length === 0 ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.5 }}>
-                                    <Typography variant="body2">No groups available for this date</Typography>
+                                    <Typography variant="body2">此日期没有可用的组</Typography>
                                 </Box>
                             ) : (
                                 <List disablePadding sx={{ p: 1 }}>
@@ -312,7 +312,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                                                 />
                                                 <ListItemText
                                                     primary={group.name}
-                                                    secondary={`${group.images.length} images`}
+                                                    secondary={`${group.images.length} 张图片`}
                                                     primaryTypographyProps={{ fontWeight: 400, fontSize: '0.95rem', color: isSelected ? 'primary.main' : 'text.primary' }}
                                                     secondaryTypographyProps={{ fontSize: '0.8rem' }}
                                                 />
@@ -327,7 +327,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                         {availableSpecies && (
                             <Box sx={{ mt: 3, px: 1 }}>
                                 <Typography variant="caption" fontWeight="700" color="text.secondary" sx={{ mb: 1.5, display: 'block', letterSpacing: 1 }}>
-                                    SPECIES
+                                    物种
                                 </Typography>
                                 <Autocomplete
                                     multiple
@@ -336,7 +336,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                                     value={selectedSpecies}
                                     onChange={(_, newValue) => setSelectedSpecies(newValue)}
                                     renderInput={(params) => (
-                                        <TextField {...params} placeholder="Select species..." size="small" />
+                                        <TextField {...params} placeholder="选择物种..." size="small" />
                                     )}
                                     renderTags={(value, getTagProps) =>
                                         value.map((option, index) => {
@@ -352,7 +352,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                         {availableSpecies && (
                             <Box sx={{ mt: 3, px: 1 }}>
                                 <Typography variant="caption" fontWeight="700" color="text.secondary" sx={{ mb: 1, display: 'block', letterSpacing: 1 }}>
-                                    MIN CONFIDENCE: {Math.round(minConfidence * 100)}%
+                                    最低置信度: {Math.round(minConfidence * 100)}%
                                 </Typography>
                                 <Slider
                                     value={minConfidence}
@@ -380,7 +380,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                         color="error"
                         sx={{ textTransform: 'none', borderRadius: 2, px: 2, fontWeight: 600 }}
                     >
-                        Reset
+                        重置
                     </Button>
                     <Box sx={{ display: 'flex', gap: 1.5 }}>
                         <Button
@@ -388,7 +388,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                             color="inherit"
                             sx={{ textTransform: 'none', borderRadius: 2, px: 2, fontWeight: 600, color: 'text.secondary' }}
                         >
-                            Cancel
+                            取消
                         </Button>
                         <Button
                             onClick={handleApply}
@@ -397,7 +397,7 @@ export const LibraryFilterDialog: React.FC<LibraryFilterDialogProps> = ({
                             disableElevation
                             sx={{ textTransform: 'none', borderRadius: 2, px: 4, fontWeight: 600 }}
                         >
-                            Apply Filter
+                            应用筛选
                         </Button>
                     </Box>
                 </Box>

@@ -4,6 +4,7 @@ import { X, MagnifyingGlassPlus, MagnifyingGlassMinus, CaretLeft, CaretRight, Tr
 import { FileDetails, Detection, ReidInfoForImage } from '../types/electron';
 import { LiquidGlassOverlay } from './LiquidGlassOverlay';
 import AnalysisSidebar from './AnalysisSidebar';
+import { translateSpecies } from '../constants/species';
 
 interface ReidInfoForDetection {
     individualDisplayName: string;
@@ -34,7 +35,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
     useLiquidGlass = true,
     onDelete,
     customPopupContent,
-    popupTitle = "Detection Details",
+    popupTitle = "检测详情",
     popupIcon = <Sparkle size={18} weight="fill" color="#4285F4" />,
     reidResults
 }) => {
@@ -121,7 +122,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                         borderRadius: '4px 4px 0 0',
                     }}
                 >
-                    {detection.label} ({Math.round(detection.confidence * 100)}%)
+                    {translateSpecies(detection.label)} ({Math.round(detection.confidence * 100)}%)
                 </Box>
 
                 {/* Info Popup for Standard Mode */}
@@ -143,10 +144,10 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                             {/* Classification Section */}
                             <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                Classification
+                                分类
                             </Typography>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="caption" color="text.secondary">Species</Typography>
+                                <Typography variant="caption" color="text.secondary">物种</Typography>
                                 <Box sx={{
                                     bgcolor: 'rgba(66, 133, 244, 0.1)',
                                     color: '#4285F4',
@@ -155,17 +156,17 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                     fontSize: '0.75rem',
                                     fontWeight: 600
                                 }}>
-                                    {detection.label}
+                                    {translateSpecies(detection.label)}
                                 </Box>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <Typography variant="caption" color="text.secondary">Confidence</Typography>
+                                <Typography variant="caption" color="text.secondary">置信度</Typography>
                                 <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                                     {(detection.confidence * 100).toFixed(1)}%
                                 </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <Typography variant="caption" color="text.secondary">Detection Score</Typography>
+                                <Typography variant="caption" color="text.secondary">检测分数</Typography>
                                 <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                                     {(detection.detection_confidence * 100).toFixed(1)}%
                                 </Typography>
@@ -184,11 +185,11 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                     <>
                                         <Box sx={{ borderTop: `1px solid ${theme.palette.divider}`, mt: 1, pt: 1 }} />
                                         <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                            Re-identification
+                                            个体鉴别
                                         </Typography>
                                         {uniqueResults.slice(0, 1).map((reid, idx) => (
                                             <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <Typography variant="caption" color="text.secondary">Individual</Typography>
+                                                <Typography variant="caption" color="text.secondary">个体</Typography>
                                                 <Box sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -216,7 +217,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                     sx={{ mt: 1, color: '#ff4444', width: '100%', borderRadius: 1, '&:hover': { bgcolor: 'rgba(255,68,68,0.1)' } }}
                                 >
                                     <Trash size={16} />
-                                    <Typography variant="caption" sx={{ ml: 0.5 }}>Delete Detection</Typography>
+                                    <Typography variant="caption" sx={{ ml: 0.5 }}>删除检测</Typography>
                                 </IconButton>
                             )}
                         </Box>
@@ -329,7 +330,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     }}
                 >
-                    {detection.label}
+                    {translateSpecies(detection.label)}
                 </Box>
             </Box>
 
@@ -379,10 +380,10 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                     {/* Classification Section */}
                                     <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                        Classification
+                                        分类
                                     </Typography>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography variant="caption" color="text.secondary">Species</Typography>
+                                        <Typography variant="caption" color="text.secondary">物种</Typography>
                                         <Box sx={{
                                             bgcolor: 'rgba(66, 133, 244, 0.1)',
                                             color: '#4285F4',
@@ -391,17 +392,17 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                             fontSize: '0.75rem',
                                             fontWeight: 600
                                         }}>
-                                            {detection.label}
+                                            {translateSpecies(detection.label)}
                                         </Box>
                                     </Box>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="caption" color="text.secondary">Confidence</Typography>
+                                        <Typography variant="caption" color="text.secondary">置信度</Typography>
                                         <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                                             {(detection.confidence * 100).toFixed(1)}%
                                         </Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="caption" color="text.secondary">Detection Score</Typography>
+                                        <Typography variant="caption" color="text.secondary">检测分数</Typography>
                                         <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                                             {(detection.detection_confidence * 100).toFixed(1)}%
                                         </Typography>
@@ -420,11 +421,11 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                             <>
                                                 <Box sx={{ borderTop: `1px solid ${theme.palette.divider}`, mt: 1, pt: 1 }} />
                                                 <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                                    Re-identification
+                                                    个体鉴别
                                                 </Typography>
                                                 {uniqueResults.slice(0, 1).map((reid, idx) => (
                                                     <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <Typography variant="caption" color="text.secondary">Individual</Typography>
+                                                        <Typography variant="caption" color="text.secondary">个体</Typography>
                                                         <Box sx={{
                                                             display: 'flex',
                                                             alignItems: 'center',
@@ -452,7 +453,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
                                             sx={{ mt: 1, color: '#ff4444', width: '100%', borderRadius: 1, '&:hover': { bgcolor: 'rgba(255,68,68,0.1)' } }}
                                         >
                                             <Trash size={16} />
-                                            <Typography variant="caption" sx={{ ml: 0.5 }}>Delete Detection</Typography>
+                                            <Typography variant="caption" sx={{ ml: 0.5 }}>删除检测</Typography>
                                         </IconButton>
                                     )}
                                 </Box>

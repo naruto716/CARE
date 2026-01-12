@@ -10,6 +10,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Box, Paper, Typography, Fade, useTheme } from '@mui/material';
 import { Detection } from '../types/electron';
+import { translateSpecies } from '../constants/species';
 
 // Module-level storage for animated position - persists across remounts
 const persistentAnimatedBbox = {
@@ -184,21 +185,21 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
   // Load texture when imageUrl changes
   useEffect(() => {
     if (!imageUrl || imageUrl === currentImageUrl.current) return;
-    
+
     currentImageUrl.current = imageUrl;
-    
+
     // Dispose old texture
     if (textureRef.current) {
       textureRef.current.dispose();
     }
-    
+
     const loader = new THREE.TextureLoader();
     loader.load(imageUrl, (tex) => {
       tex.minFilter = THREE.LinearFilter;
       tex.magFilter = THREE.LinearFilter;
       textureRef.current = tex;
       setHasTexture(true);
-      
+
       // Force update the material's texture uniform
       if (meshRef.current) {
         const material = meshRef.current.material as THREE.ShaderMaterial;
@@ -208,7 +209,7 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
         }
       }
     });
-    
+
     return () => {
       // Cleanup on unmount
       if (textureRef.current) {
@@ -232,10 +233,10 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
   // Animate each frame - smooth lerp toward target using PERSISTENT state
   useFrame((state) => {
     if (!meshRef.current) return;
-    
+
     const material = meshRef.current.material as THREE.ShaderMaterial;
     if (!material.uniforms) return;
-    
+
     // Only animate when we have a valid target (width/height > 0)
     // This freezes position during image loading when bboxes is empty
     if (targetBbox.width > 0 && targetBbox.height > 0) {
@@ -245,25 +246,25 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
       persistentAnimatedBbox.width += (targetBbox.width - persistentAnimatedBbox.width) * lerp;
       persistentAnimatedBbox.height += (targetBbox.height - persistentAnimatedBbox.height) * lerp;
     }
-    
+
     // Spring physics for drag offset when not dragging
     if (!isDragging) {
       // Spring back to origin with damped oscillation
       const springStrength = 0.15;
       const damping = 0.75;
-      
+
       // Apply spring force toward origin
       dragState.velocityX += -dragState.offsetX * springStrength;
       dragState.velocityY += -dragState.offsetY * springStrength;
-      
+
       // Apply damping
       dragState.velocityX *= damping;
       dragState.velocityY *= damping;
-      
+
       // Update position
       dragState.offsetX += dragState.velocityX;
       dragState.offsetY += dragState.velocityY;
-      
+
       // Snap to zero when close enough
       if (Math.abs(dragState.offsetX) < 0.1 && Math.abs(dragState.velocityX) < 0.1) {
         dragState.offsetX = 0;
@@ -274,12 +275,12 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
         dragState.velocityY = 0;
       }
     }
-    
+
     // Bouncy scale animation on hover
     dragState.targetScale = isHovered ? 1.05 : 1.0;
     const scaleLerp = 0.12;
     dragState.scale += (dragState.targetScale - dragState.scale) * scaleLerp;
-    
+
     // Calculate final position with drag offset
     const finalX = persistentAnimatedBbox.x + dragState.offsetX;
     const finalY = persistentAnimatedBbox.y + dragState.offsetY;
@@ -288,14 +289,14 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
     // Adjust position to scale from center
     const scaleOffsetX = (scaledWidth - persistentAnimatedBbox.width) / 2;
     const scaleOffsetY = (scaledHeight - persistentAnimatedBbox.height) / 2;
-    
+
     // Report position for label (use unscaled position for label placement)
-    onAnimatedPosition({ 
-      x: finalX, 
+    onAnimatedPosition({
+      x: finalX,
       y: finalY,
       scale: dragState.scale
     });
-    
+
     // Update uniforms with scaled dimensions
     material.uniforms.uTime.value = state.clock.elapsedTime;
     material.uniforms.uResolution.value.set(containerWidth, containerHeight);
@@ -306,7 +307,7 @@ function GlassRenderer({ imageUrl, targetBbox, containerWidth, containerHeight, 
       scaledHeight
     );
     material.uniforms.uBorderRadius.value = Math.min(scaledWidth, scaledHeight) * 0.12;
-    
+
     // Always update texture from ref (it changes when image changes)
     if (textureRef.current) {
       material.uniforms.uTexture.value = textureRef.current;
@@ -364,10 +365,10 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
   const targetBbox = bboxes[0]?.bbox || { x: 0, y: 0, width: 0, height: 0 };
   const label = bboxes[0]?.label;
   const detection = bboxes[0]?.detection;
-  
+
   // Edge offset matches shader (50px)
   const edgeOffset = 55;
-  
+
   // Drag handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -383,7 +384,7 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
     dragState.velocityX = 0;
     dragState.velocityY = 0;
   }, []);
-  
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     const deltaX = e.clientX - dragStartRef.current.mouseX;
@@ -393,7 +394,7 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
     dragState.offsetX = dragStartRef.current.offsetX + deltaX;
     dragState.offsetY = dragStartRef.current.offsetY + deltaY;
   }, [isDragging]);
-  
+
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
@@ -402,7 +403,7 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
       dragState.velocityY = dragState.offsetY * 0.05;
     }
   }, [isDragging]);
-  
+
   // Global mouse listeners for drag
   useEffect(() => {
     if (isDragging) {
@@ -503,8 +504,8 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
           }}
         >
           {detection
-            ? `${label} ${(detection.confidence * 100).toFixed(1)}%`
-            : label}
+            ? `${translateSpecies(label || '')} ${(detection.confidence * 100).toFixed(1)}%`
+            : translateSpecies(label || '')}
         </div>
       )}
 
@@ -535,51 +536,51 @@ export const LiquidGlassOverlay: React.FC<LiquidGlassOverlayProps> = ({
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {/* Classification Section */}
                 <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  Classification
+                  分类
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="caption" color="text.secondary">Species</Typography>
-                  <Box sx={{ 
-                    bgcolor: 'rgba(66, 133, 244, 0.1)', 
-                    color: '#4285F4', 
-                    px: 1, py: 0.2, 
+                  <Typography variant="caption" color="text.secondary">物种</Typography>
+                  <Box sx={{
+                    bgcolor: 'rgba(66, 133, 244, 0.1)',
+                    color: '#4285F4',
+                    px: 1, py: 0.2,
                     borderRadius: 1,
                     fontSize: '0.75rem',
                     fontWeight: 600
                   }}>
-                    {detection?.label}
+                    {translateSpecies(detection?.label || '')}
                   </Box>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">Confidence</Typography>
+                  <Typography variant="caption" color="text.secondary">置信度</Typography>
                   <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                     {((detection?.confidence ?? 0) * 100).toFixed(1)}%
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">Detection Score</Typography>
+                  <Typography variant="caption" color="text.secondary">检测分数</Typography>
                   <Typography variant="caption" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
                     {((detection?.detection_confidence ?? 0) * 100).toFixed(1)}%
                   </Typography>
                 </Box>
-                
+
                 {/* Re-identification Section */}
                 {reidResults && reidResults.length > 0 && (
                   <>
                     <Box sx={{ borderTop: `1px solid ${theme.palette.divider}`, mt: 1, pt: 1 }} />
                     <Typography variant="caption" fontWeight="600" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Re-identification
+                      个体鉴别
                     </Typography>
                     {reidResults.map((reid, idx) => (
                       <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="caption" color="text.secondary">Individual</Typography>
-                        <Box sx={{ 
+                        <Typography variant="caption" color="text.secondary">个体</Typography>
+                        <Box sx={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: 0.5,
-                          bgcolor: `${reid.individualColor}20`, 
-                          color: reid.individualColor, 
-                          px: 1, py: 0.2, 
+                          bgcolor: `${reid.individualColor}20`,
+                          color: reid.individualColor,
+                          px: 1, py: 0.2,
                           borderRadius: 1,
                           fontSize: '0.75rem',
                           fontWeight: 600

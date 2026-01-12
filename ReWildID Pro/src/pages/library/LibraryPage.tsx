@@ -263,10 +263,10 @@ const LibraryPage: React.FC = () => {
         try {
             const result = await window.api.saveImages(paths);
             if (result.ok) {
-                alert(`Successfully saved ${result.successCount} images.`);
+                alert(`成功保存 ${result.successCount} 张图片。`);
                 clearSelection();
             } else if (result.error !== 'Operation canceled') {
-                alert(`Save failed: ${result.error}`);
+                alert(`保存失败：${result.error}`);
             }
         } catch (error) {
             console.error('Batch save error:', error);
@@ -275,7 +275,7 @@ const LibraryPage: React.FC = () => {
 
     const handleBatchDelete = async () => {
         if (selectedImageIds.size === 0) return;
-        if (window.confirm(`Are you sure you want to delete ${selectedImageIds.size} images?`)) {
+        if (window.confirm(`确定要删除 ${selectedImageIds.size} 张图片吗？`)) {
             try {
                 for (const id of selectedImageIds) {
                     await window.api.deleteImage(id);
@@ -306,7 +306,7 @@ const LibraryPage: React.FC = () => {
             clearSelection();
         } catch (error) {
             console.error('Batch detect error:', error);
-            alert('Failed to start classification: ' + error);
+            alert('启动检测失败：' + error);
         }
     };
 
@@ -320,11 +320,11 @@ const LibraryPage: React.FC = () => {
                 setIsSelectionMode(false);
                 clearSelection();
             } else {
-                alert('ReID failed: ' + result.error);
+                alert('个体鉴别失败：' + result.error);
             }
         } catch (error) {
             console.error('Batch ReID error:', error);
-            alert('Failed to start ReID: ' + error);
+            alert('启动个体鉴别失败：' + error);
         }
     };
 
@@ -341,7 +341,7 @@ const LibraryPage: React.FC = () => {
             await window.api.detect(paths, (txt) => console.log(txt), ids);
         } catch (error) {
             console.error('Classification error:', error);
-            alert('Failed to start classification: ' + error);
+            alert('启动分类失败：' + error);
         }
     };
 
@@ -350,11 +350,11 @@ const LibraryPage: React.FC = () => {
         try {
             const result = await window.api.smartReID(imageIds, species);
             if (!result.ok) {
-                alert('ReID failed: ' + result.error);
+                alert('个体鉴别失败：' + result.error);
             }
         } catch (error) {
             console.error('ReID error:', error);
-            alert('Failed to start ReID: ' + error);
+            alert('启动个体鉴别失败：' + error);
         }
     };
 
@@ -364,10 +364,10 @@ const LibraryPage: React.FC = () => {
             <RefreshNotification
                 watchJobTypes={['detect', 'reid']}
                 onRefresh={refreshLibrary}
-                message="Classification or Re-ID completed"
+                message="分类或个体鉴别已完成"
             />
             <MediaExplorer
-                title="Library"
+                title="图库"
                 loading={loading}
                 dateSections={enrichedDateSections}
                 sortBy={sortBy}
@@ -406,7 +406,7 @@ const LibraryPage: React.FC = () => {
                 onScrollStateChange={setIsScrolled}
                 headerActions={
                     <>
-                        <Tooltip title="Sort">
+                        <Tooltip title="排序">
                             <IconButton
                                 data-tour="library-sort"
                                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -448,14 +448,14 @@ const LibraryPage: React.FC = () => {
                                 selected={sortBy === 'default'}
                                 sx={{ borderRadius: '8px', py: 1 }}
                             >
-                                Default
+                                默认
                             </MenuItem>
                             <MenuItem
                                 onClick={() => { setSortBy('species'); setSelectedReidRunId(null); setSortMenuPos(null); }}
                                 selected={sortBy === 'species'}
                                 sx={{ borderRadius: '8px', py: 1 }}
                             >
-                                By Species
+                                按物种
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
@@ -474,7 +474,7 @@ const LibraryPage: React.FC = () => {
                                 disabled={reidRuns.length === 0}
                                 sx={{ borderRadius: '8px', py: 1, display: 'flex', justifyContent: 'space-between' }}
                             >
-                                <span>By Individual</span>
+                                <span>按个体</span>
                                 {reidRuns.length > 0 && <span style={{ opacity: 0.5, fontSize: '0.9em' }}>›</span>}
                             </MenuItem>
                             <MenuItem
@@ -482,7 +482,7 @@ const LibraryPage: React.FC = () => {
                                 selected={sortBy === 'name'}
                                 sx={{ borderRadius: '8px', py: 1 }}
                             >
-                                By Image Name
+                                按图片名称
                             </MenuItem>
                         </Menu>
 
@@ -511,7 +511,7 @@ const LibraryPage: React.FC = () => {
                             }}
                         >
                             <MenuItem disabled sx={{ opacity: 0.6, fontSize: '0.8rem', py: 0.5 }}>
-                                Select ReID Run
+                                选择个体鉴别运行
                             </MenuItem>
                             {reidRuns.map(run => (
                                 <MenuItem
@@ -531,7 +531,7 @@ const LibraryPage: React.FC = () => {
                         </Menu>
 
                         <Button data-tour="library-new-job" variant="contained" startIcon={<Plus />} onClick={triggerUpload} sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}>
-                            New Job
+                            新建任务
                         </Button>
                     </>
                 }
@@ -593,7 +593,7 @@ const LibraryPage: React.FC = () => {
                     pointerEvents: isScrolled ? 'auto' : 'none'
                 }}
             >
-                <Tooltip title="Filter">
+                <Tooltip title="筛选">
                     <span>
                         <LiquidGlassButton
                             size={32}
@@ -602,7 +602,7 @@ const LibraryPage: React.FC = () => {
                         />
                     </span>
                 </Tooltip>
-                <Tooltip title={isSelectionMode ? 'Exit Selection' : 'Select'}>
+                <Tooltip title={isSelectionMode ? '退出选择' : '选择'}>
                     <span>
                         <LiquidGlassButton
                             size={32}
@@ -611,7 +611,7 @@ const LibraryPage: React.FC = () => {
                         />
                     </span>
                 </Tooltip>
-                <Tooltip title="Sort">
+                <Tooltip title="排序">
                     <span>
                         <LiquidGlassButton
                             size={32}
@@ -623,7 +623,7 @@ const LibraryPage: React.FC = () => {
                         />
                     </span>
                 </Tooltip>
-                <Tooltip title="Upload">
+                <Tooltip title="上传">
                     <span>
                         <LiquidGlassButton
                             size={32}
@@ -632,7 +632,7 @@ const LibraryPage: React.FC = () => {
                         />
                     </span>
                 </Tooltip>
-                <Tooltip title="Back to Top">
+                <Tooltip title="回到顶部">
                     <span>
                         <LiquidGlassButton
                             size={32}

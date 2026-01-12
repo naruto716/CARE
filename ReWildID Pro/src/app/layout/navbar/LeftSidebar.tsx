@@ -51,12 +51,12 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ open, onClose }) => {
     const hasGradient = colorTheme.gradient !== 'none' || !!colorTheme.special || !!colorTheme.image;
 
     const allNavItems = [
-        { key: 'dashboard', label: 'Dashboard', path: '/', icon: <House weight="regular" size={20} /> },
-        { key: 'library', label: 'Library', path: '/library', icon: <Images weight="regular" size={20} /> },
-        { key: 'classification', label: 'Classification', path: '/classification', icon: <Sparkle weight="regular" size={20} /> },
-        { key: 'reid', label: 'Re-identification', path: '/reid', icon: <Fingerprint weight="regular" size={20} /> },
-        { key: 'agent', label: 'AI Agent', path: '/agent', icon: <OpenAiLogo weight="regular" size={20} /> },
-        { key: 'settings', label: 'Settings', path: '/settings', icon: <Gear weight="regular" size={20} /> },
+        { key: 'dashboard', label: '仪表板', path: '/', icon: <House weight="regular" size={20} /> },
+        { key: 'library', label: '图库', path: '/library', icon: <Images weight="regular" size={20} /> },
+        { key: 'classification', label: '分类', path: '/classification', icon: <Sparkle weight="regular" size={20} /> },
+        { key: 'reid', label: '个体鉴别', path: '/reid', icon: <Fingerprint weight="regular" size={20} /> },
+        { key: 'agent', label: 'AI助手', path: '/agent', icon: <OpenAiLogo weight="regular" size={20} /> },
+        { key: 'settings', label: '设置', path: '/settings', icon: <Gear weight="regular" size={20} /> },
     ];
 
     // Track AI Agent enabled state with live updates
@@ -176,7 +176,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ open, onClose }) => {
                             letterSpacing: '-0.02em'
                         }}
                     >
-                        RewildID
+                        鱼类识别
                     </Typography>
                     <Typography
                         variant="caption"
@@ -189,7 +189,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ open, onClose }) => {
                             textTransform: 'uppercase'
                         }}
                     >
-                        Pro Edition
+                        开发演示版本
                     </Typography>
                 </Box>
             </Box>
@@ -251,7 +251,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ open, onClose }) => {
 
             <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
                 <Typography variant="h6" sx={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, color: theme.palette.mode === 'dark' ? 'white' : '#1C1C1C', opacity: 0.7, fontSize: '16px' }}>
-                    MARS Lab
+
                 </Typography>
             </Box>
 

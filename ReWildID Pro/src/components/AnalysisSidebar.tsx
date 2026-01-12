@@ -5,6 +5,7 @@ import {
 import {
     CaretDown, CaretRight, Tag, BoundingBox, Fingerprint, Trash, Plus, Check
 } from '@phosphor-icons/react';
+import { translateSpecies } from '../constants/species';
 
 interface DetectionResult {
     id: number;
@@ -260,7 +261,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                 justifyContent: 'space-between'
             }}>
                 <Typography variant="subtitle1" fontWeight={600}>
-                    Analysis
+                    分析
                 </Typography>
                 {/* Save status indicator */}
                 <Box sx={{
@@ -274,13 +275,13 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                         <>
                             <Check size={14} weight="bold" color={theme.palette.success.main} />
                             <Typography variant="caption" color="success.main">
-                                Saved
+                                已保存
                             </Typography>
                         </>
                     )}
                     {saveStatus === 'saving' && (
                         <Typography variant="caption" color="text.secondary">
-                            Saving...
+                            正在保存...
                         </Typography>
                     )}
                 </Box>
@@ -290,12 +291,12 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
             <Box sx={{ flex: 1, overflow: 'auto' }}>
                 {/* Metadata Section - Table Based */}
                 <CollapsibleSection
-                    title="Metadata"
+                    title="元数据"
                     icon={<Tag size={16} weight="duotone" />}
                     badge={Object.keys(metadata).length}
                 >
                     {isLoadingMetadata ? (
-                        <Typography variant="body2" color="text.secondary">Loading...</Typography>
+                        <Typography variant="body2" color="text.secondary">加载中...</Typography>
                     ) : (
                         <Box>
                             <Table size="small" sx={{
@@ -357,7 +358,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                                     size="small"
                                                     variant="standard"
                                                     fullWidth
-                                                    placeholder="Key"
+                                                    placeholder="键"
                                                     value={newKey}
                                                     onChange={(e) => setNewKey(e.target.value)}
                                                     autoFocus
@@ -380,7 +381,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                                     size="small"
                                                     variant="standard"
                                                     fullWidth
-                                                    placeholder="Value"
+                                                    placeholder="值"
                                                     value={newValue}
                                                     onChange={(e) => setNewValue(e.target.value)}
                                                     InputProps={{
@@ -432,7 +433,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                         }}
                                     >
                                         <Plus size={12} />
-                                        <Typography variant="caption" sx={{ ml: 0.5, fontSize: '0.7rem' }}>Add</Typography>
+                                        <Typography variant="caption" sx={{ ml: 0.5, fontSize: '0.7rem' }}>添加</Typography>
                                     </IconButton>
                                 </Box>
                             )}
@@ -443,12 +444,12 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                 {/* Detections Section - Species classification */}
                 {(detections.length > 0 || isLoadingAnalysis) && (
                     <CollapsibleSection
-                        title="Detections"
+                        title="检测"
                         icon={<BoundingBox size={16} weight="duotone" />}
                         badge={detections.length}
                     >
                         {isLoadingAnalysis ? (
-                            <Typography variant="body2" color="text.secondary">Loading...</Typography>
+                            <Typography variant="body2" color="text.secondary">加载中...</Typography>
                         ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 {detections.map((det) => (
@@ -463,7 +464,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                     >
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                                             <Typography variant="body2" fontWeight={600}>
-                                                {det.label}
+                                                {translateSpecies(det.label)}
                                             </Typography>
                                             <Chip
                                                 label={`${(det.confidence * 100).toFixed(1)}%`}
@@ -479,7 +480,7 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                             />
                                         </Box>
                                         <Typography variant="caption" color="text.secondary">
-                                            Detection confidence: {(det.detection_confidence * 100).toFixed(1)}%
+                                            检测置信度: {(det.detection_confidence * 100).toFixed(1)}%
                                         </Typography>
                                     </Box>
                                 ))}
@@ -491,12 +492,12 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                 {/* Re-Identification Section - Individual matching (NO confidence) */}
                 {(reidResults.length > 0 || isLoadingAnalysis) && (
                     <CollapsibleSection
-                        title="Re-Identification"
+                        title="个体鉴别"
                         icon={<Fingerprint size={16} weight="duotone" />}
                         badge={reidResults.length}
                     >
                         {isLoadingAnalysis ? (
-                            <Typography variant="body2" color="text.secondary">Loading...</Typography>
+                            <Typography variant="body2" color="text.secondary">加载中...</Typography>
                         ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 {reidResults.map((reid, idx) => (
@@ -522,10 +523,10 @@ const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                                             </Typography>
                                         </Box>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                            Species: {reid.species}
+                                            物种: {translateSpecies(reid.species)}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                            Run: {reid.runName}
+                                            运行: {reid.runName}
                                         </Typography>
                                     </Box>
                                 ))}

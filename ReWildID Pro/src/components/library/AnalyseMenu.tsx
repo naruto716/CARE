@@ -40,7 +40,7 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
     const theme = useTheme();
     const [selectedSpecies, setSelectedSpecies] = useState<string>(DEFAULT_SPECIES);
     const [showReIDOptions, setShowReIDOptions] = useState(reidOnly);
-    
+
     // Group species: active ones first, then future ones (greyed out)
     const speciesOptions = [
         ...ACTIVE_SPECIES.map(s => ({ species: s, group: 'Available', disabled: false })),
@@ -75,8 +75,8 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
             fullWidth
             PaperProps={{
                 sx: {
-                    bgcolor: theme.palette.mode === 'light' 
-                        ? alpha('#FFFFFF', 0.85) 
+                    bgcolor: theme.palette.mode === 'light'
+                        ? alpha('#FFFFFF', 0.85)
                         : alpha(theme.palette.background.paper, 0.85),
                     backdropFilter: 'blur(20px)',
                     borderRadius: 3,
@@ -88,9 +88,9 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                 }
             }}
         >
-            <DialogTitle sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+            <DialogTitle sx={{
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'space-between',
                 pb: 1
             }}>
@@ -107,7 +107,7 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
 
             <DialogContent sx={{ pt: 1 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-                    {selectedCount} image{selectedCount !== 1 ? 's' : ''} selected
+                    {selectedCount} 张图片已选择
                 </Typography>
 
                 {!showReIDOptions ? (
@@ -122,14 +122,14 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                 p: 2,
                                 borderRadius: 2,
                                 cursor: 'pointer',
-                                bgcolor: theme.palette.mode === 'light' 
-                                    ? alpha('#000000', 0.04) 
+                                bgcolor: theme.palette.mode === 'light'
+                                    ? alpha('#000000', 0.04)
                                     : alpha('#FFFFFF', 0.06),
                                 border: `1px solid ${theme.palette.divider}`,
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
-                                    bgcolor: theme.palette.mode === 'light' 
-                                        ? alpha('#000000', 0.08) 
+                                    bgcolor: theme.palette.mode === 'light'
+                                        ? alpha('#000000', 0.08)
                                         : alpha('#FFFFFF', 0.10),
                                     transform: 'translateY(-1px)',
                                     boxShadow: theme.palette.mode === 'light'
@@ -145,17 +145,17 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                bgcolor: theme.palette.mode === 'light' 
-                                    ? alpha('#000000', 0.08) 
+                                bgcolor: theme.palette.mode === 'light'
+                                    ? alpha('#000000', 0.08)
                                     : alpha('#FFFFFF', 0.12),
                                 color: theme.palette.text.primary
                             }}>
                                 <Sparkle size={24} weight="fill" />
                             </Box>
                             <Box>
-                                <Typography fontWeight={600}>Classification</Typography>
+                                <Typography fontWeight={600}>分类</Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                    Detect and classify animals in images
+                                    在图片中检测和分类动物
                                 </Typography>
                             </Box>
                         </Box>
@@ -170,14 +170,14 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                 p: 2,
                                 borderRadius: 2,
                                 cursor: 'pointer',
-                                bgcolor: theme.palette.mode === 'light' 
-                                    ? alpha('#000000', 0.04) 
+                                bgcolor: theme.palette.mode === 'light'
+                                    ? alpha('#000000', 0.04)
                                     : alpha('#FFFFFF', 0.06),
                                 border: `1px solid ${theme.palette.divider}`,
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
-                                    bgcolor: theme.palette.mode === 'light' 
-                                        ? alpha('#000000', 0.08) 
+                                    bgcolor: theme.palette.mode === 'light'
+                                        ? alpha('#000000', 0.08)
                                         : alpha('#FFFFFF', 0.10),
                                     transform: 'translateY(-1px)',
                                     boxShadow: theme.palette.mode === 'light'
@@ -193,17 +193,17 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                bgcolor: theme.palette.mode === 'light' 
-                                    ? alpha('#000000', 0.08) 
+                                bgcolor: theme.palette.mode === 'light'
+                                    ? alpha('#000000', 0.08)
                                     : alpha('#FFFFFF', 0.12),
                                 color: theme.palette.text.primary
                             }}>
                                 <Fingerprint size={24} weight="fill" />
                             </Box>
                             <Box>
-                                <Typography fontWeight={600}>Re-identification</Typography>
+                                <Typography fontWeight={600}>个体鉴别</Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                    Match individuals across images
+                                    跨图片匹配个体
                                 </Typography>
                             </Box>
                         </Box>
@@ -212,11 +212,11 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                             <Fingerprint size={20} weight="fill" color={theme.palette.text.primary} />
-                            <Typography fontWeight={600}>Re-identification</Typography>
+                            <Typography fontWeight={600}>个体鉴别</Typography>
                         </Box>
-                        
+
                         <Typography variant="body2" color="text.secondary">
-                            Select a species to identify individuals
+                            选择物种以识别个体
                         </Typography>
 
                         <Autocomplete
@@ -229,12 +229,12 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                             value={speciesOptions.find(o => o.species === selectedSpecies) || null}
                             onChange={(_, newValue) => setSelectedSpecies(newValue?.species || '')}
                             isOptionEqualToValue={(option, value) => option.species === value.species}
-                            noOptionsText="No species available"
+                            noOptionsText="没有可用的物种"
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Species"
-                                    placeholder="Type to search..."
+                                    label="物种"
+                                    placeholder="输入搜索..."
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 2,
@@ -270,8 +270,8 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                     sx: {
                                         borderRadius: 2,
                                         mt: 0.5,
-                                        bgcolor: theme.palette.mode === 'light' 
-                                            ? 'rgba(255, 255, 255, 0.95)' 
+                                        bgcolor: theme.palette.mode === 'light'
+                                            ? 'rgba(255, 255, 255, 0.95)'
                                             : 'rgba(40, 40, 40, 0.95)',
                                         backdropFilter: 'blur(10px)',
                                         boxShadow: theme.palette.mode === 'light'
@@ -283,17 +283,17 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                             mx: 0.5,
                                             my: 0.25,
                                             '&:hover': {
-                                                bgcolor: theme.palette.mode === 'light' 
-                                                    ? alpha('#000000', 0.06) 
+                                                bgcolor: theme.palette.mode === 'light'
+                                                    ? alpha('#000000', 0.06)
                                                     : alpha('#FFFFFF', 0.08)
                                             },
                                             '&[aria-selected="true"]': {
-                                                bgcolor: theme.palette.mode === 'light' 
-                                                    ? alpha('#000000', 0.08) 
+                                                bgcolor: theme.palette.mode === 'light'
+                                                    ? alpha('#000000', 0.08)
                                                     : alpha('#FFFFFF', 0.12),
                                                 '&:hover': {
-                                                    bgcolor: theme.palette.mode === 'light' 
-                                                        ? alpha('#000000', 0.10) 
+                                                    bgcolor: theme.palette.mode === 'light'
+                                                        ? alpha('#000000', 0.10)
                                                         : alpha('#FFFFFF', 0.15)
                                                 }
                                             },
@@ -311,15 +311,15 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
 
                         <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
                             {!reidOnly && (
-                                <Button 
-                                    variant="text" 
+                                <Button
+                                    variant="text"
                                     onClick={() => setShowReIDOptions(false)}
-                                    sx={{ 
+                                    sx={{
                                         borderRadius: 2,
                                         color: theme.palette.text.secondary
                                     }}
                                 >
-                                    Back
+                                    返回
                                 </Button>
                             )}
                             <Button
@@ -327,7 +327,7 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                 onClick={handleReID}
                                 disabled={!selectedSpecies}
                                 startIcon={<Fingerprint size={18} />}
-                                sx={{ 
+                                sx={{
                                     borderRadius: 2,
                                     textTransform: 'none',
                                     bgcolor: theme.palette.mode === 'light' ? '#000000' : '#FFFFFF',
@@ -336,16 +336,16 @@ export const AnalyseMenu: React.FC<AnalyseMenuProps> = ({
                                         bgcolor: theme.palette.mode === 'light' ? '#333333' : '#E0E0E0'
                                     },
                                     '&.Mui-disabled': {
-                                        bgcolor: theme.palette.mode === 'light' 
-                                            ? alpha('#000000', 0.3) 
+                                        bgcolor: theme.palette.mode === 'light'
+                                            ? alpha('#000000', 0.3)
                                             : alpha('#FFFFFF', 0.3),
-                                        color: theme.palette.mode === 'light' 
-                                            ? alpha('#FFFFFF', 0.5) 
+                                        color: theme.palette.mode === 'light'
+                                            ? alpha('#FFFFFF', 0.5)
                                             : alpha('#000000', 0.5)
                                     }
                                 }}
                             >
-                                Start ReID
+                                开始个体鉴别
                             </Button>
                         </Box>
                     </Box>

@@ -19,7 +19,7 @@ interface RefreshNotificationProps {
 export const RefreshNotification: React.FC<RefreshNotificationProps> = ({
     watchJobTypes,
     onRefresh,
-    message = 'New data available'
+    message = '有新数据可用'
 }) => {
     const theme = useTheme();
     const [show, setShow] = useState(false);
@@ -88,7 +88,7 @@ export const RefreshNotification: React.FC<RefreshNotificationProps> = ({
                     px: 2,
                     py: 1,
                     borderRadius: 2,
-                    bgcolor: theme.palette.mode === 'dark' 
+                    bgcolor: theme.palette.mode === 'dark'
                         ? alpha(theme.palette.primary.main, 0.15)
                         : alpha(theme.palette.primary.main, 0.1),
                     border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
@@ -96,9 +96,9 @@ export const RefreshNotification: React.FC<RefreshNotificationProps> = ({
                     boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.15)}`,
                 }}
             >
-                <ArrowClockwise 
-                    size={18} 
-                    weight="bold" 
+                <ArrowClockwise
+                    size={18}
+                    weight="bold"
                     color={theme.palette.primary.main}
                     style={{ animation: 'spin 2s linear infinite' }}
                 />
@@ -119,7 +119,7 @@ export const RefreshNotification: React.FC<RefreshNotificationProps> = ({
                         borderRadius: 1.5,
                     }}
                 >
-                    Refresh
+                    刷新
                 </Button>
                 <Box
                     component="button"

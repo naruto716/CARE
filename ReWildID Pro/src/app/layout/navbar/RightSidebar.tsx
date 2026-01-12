@@ -75,7 +75,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                 }}
             >
                 <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                    {title || 'Notifications'}
+                    {title || '通知'}
                 </Typography>
 
                 <IconButton
@@ -93,7 +93,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             }}>
                 {children || (
                     <Typography color="text.secondary">
-                        No notifications.
+                        无通知。
                     </Typography>
                 )}
             </Box>

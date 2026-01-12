@@ -154,7 +154,7 @@ export default function Navbar({
     } else if (location.pathname.match(/^\/reid\/run\/\d+\/individual\/\d+$/)) {
         const individualName = (location.state as any)?.individual?.display_name || `Individual ${location.pathname.split('/').pop()}`;
         customBreadcrumbItems = [
-            { label: 'ReID', path: '/reid' },
+            { label: '个体鉴别', path: '/reid' },
             { label: individualName, path: location.pathname }
         ];
     } else {
@@ -245,7 +245,7 @@ export default function Navbar({
                         <Sidebar size={24} />
                     </IconButton>
 
-                    <Tooltip title="Go Back">
+                    <Tooltip title="后退">
                         <span>
                             <IconButton
                                 color="inherit"
@@ -263,7 +263,7 @@ export default function Navbar({
                         </span>
                     </Tooltip>
 
-                    <Tooltip title="Go Forward">
+                    <Tooltip title="前进">
                         <span>
                             <IconButton
                                 color="inherit"
@@ -345,7 +345,7 @@ export default function Navbar({
                         >
                             <OpenAiLogo size={16} color={muiTheme.palette.text.secondary} />
                             <InputBase
-                                placeholder="Ask AI..."
+                                placeholder="询问AI..."
                                 inputProps={{ 'aria-label': 'ask ai' }}
                                 value={aiQuery}
                                 onChange={(e) => setAiQuery(e.target.value)}
@@ -362,7 +362,7 @@ export default function Navbar({
                         </Box>
                     )}
 
-                    <Tooltip title="Tasks">
+                    <Tooltip title="任务">
                         <IconButton
                             color="inherit"
                             onClick={toggleRightSidebar}
@@ -390,7 +390,7 @@ export default function Navbar({
                     </Tooltip>
                     {inElectron && (
                         <Box sx={{ display: 'flex', gap: 0.5, ml: 1, WebkitAppRegion: 'no-drag' }}>
-                            <Tooltip title="Minimize">
+                            <Tooltip title="最小化">
                                 <IconButton
                                     color="inherit"
                                     onClick={handleMinimize}
@@ -399,7 +399,7 @@ export default function Navbar({
                                     <Minus size={18} />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title={isMaximized ? 'Restore' : 'Maximize'}>
+                            <Tooltip title={isMaximized ? '还原' : '最大化'}>
                                 <IconButton
                                     color="inherit"
                                     onClick={handleMaximize}
@@ -408,7 +408,7 @@ export default function Navbar({
                                     {isMaximized ? <CornersIn size={18} /> : <CornersOut size={18} />}
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title="Close">
+                            <Tooltip title="关闭">
                                 <IconButton
                                     color="inherit"
                                     onClick={handleClose}

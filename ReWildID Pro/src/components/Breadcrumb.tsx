@@ -1,6 +1,20 @@
 import { Box, Breadcrumbs, Link, Typography } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
+// Translation map for route paths
+const ROUTE_TRANSLATIONS: Record<string, string> = {
+    'library': '图库',
+    'dashboard': '仪表板',
+    'classification': '分类',
+    'reid': '个体鉴别',
+    'agent': 'AI助手',
+    'settings': '设置',
+};
+
+function translateRoute(route: string): string {
+    return ROUTE_TRANSLATIONS[route.toLowerCase()] || route.charAt(0).toUpperCase() + route.slice(1);
+}
+
 interface BreadcrumbProps {
     customItems?: { label: string; path: string }[];
 }
@@ -20,7 +34,7 @@ export default function Breadcrumb({ customItems }: BreadcrumbProps) {
         <Box role="presentation" sx={{ ml: 2, width: 'fit-content', flexShrink: 0, flexGrow: 0 }}>
             <Breadcrumbs aria-label="breadcrumb">
                 <Link component={RouterLink} underline="none" color="text.secondary" to="/" sx={linkSx}>
-                    Home
+                    主页
                 </Link>
                 {customItems ? (
                     customItems.map((item, index) => {
@@ -40,11 +54,11 @@ export default function Breadcrumb({ customItems }: BreadcrumbProps) {
 
                         return last ? (
                             <Typography color="text.primary" key={to}>
-                                {value.charAt(0).toUpperCase() + value.slice(1)}
+                                {translateRoute(value)}
                             </Typography>
                         ) : (
                             <Link component={RouterLink} underline="none" color="text.secondary" to={to} key={to} sx={linkSx}>
-                                {value.charAt(0).toUpperCase() + value.slice(1)}
+                                {translateRoute(value)}
                             </Link>
                         );
                     })
@@ -53,3 +67,4 @@ export default function Breadcrumb({ customItems }: BreadcrumbProps) {
         </Box>
     );
 }
+

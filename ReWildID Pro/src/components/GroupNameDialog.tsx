@@ -14,7 +14,7 @@ export const GroupNameDialog: React.FC<GroupNameDialogProps> = ({
     open,
     onClose,
     onConfirm,
-    title = 'Enter Group Name',
+    title = '输入组名',
     initialValue = ''
 }) => {
     const [name, setName] = useState(initialValue);
@@ -30,7 +30,7 @@ export const GroupNameDialog: React.FC<GroupNameDialogProps> = ({
 
     const handleSubmit = () => {
         if (!name.trim()) {
-            setError('Group name cannot be empty');
+            setError('组名不能为空');
             return;
         }
         onConfirm(name.trim());
@@ -100,7 +100,7 @@ export const GroupNameDialog: React.FC<GroupNameDialogProps> = ({
                 <TextField
                     autoFocus
                     margin="dense"
-                    label="Group Name"
+                    label="组名"
                     fullWidth
                     variant="outlined"
                     value={name}
@@ -136,7 +136,7 @@ export const GroupNameDialog: React.FC<GroupNameDialogProps> = ({
                         }
                     }}
                 >
-                    Cancel
+                    取消
                 </Button>
                 <Button
                     onClick={handleSubmit}
@@ -151,7 +151,7 @@ export const GroupNameDialog: React.FC<GroupNameDialogProps> = ({
                         }
                     }}
                 >
-                    Confirm
+                    确认
                 </Button>
             </DialogActions>
         </Dialog>

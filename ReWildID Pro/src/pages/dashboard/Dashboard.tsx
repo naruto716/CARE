@@ -112,7 +112,7 @@ const RingChart = ({
                     {loading ? (
                         <Skeleton variant="circular" width={size - strokeWidth * 2} height={size - strokeWidth * 2} />
                     ) : (
-                        <Typography variant="body2" color="text.secondary">No data</Typography>
+                        <Typography variant="body2" color="text.secondary">暂无数据</Typography>
                     )}
                 </Box>
             </Box>
@@ -180,7 +180,7 @@ const RingChart = ({
                     ) : (
                         <>
                             <Typography variant="h5" fontWeight={600}>{total}</Typography>
-                            <Typography variant="caption" color="text.secondary">Total</Typography>
+                            <Typography variant="caption" color="text.secondary">总计</Typography>
                         </>
                     )}
                 </Box>
@@ -335,7 +335,7 @@ const TimelineChart = ({
         return (
             <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loading ? <Skeleton variant="rounded" width="100%" height={120} /> : (
-                    <Typography variant="body2" color="text.secondary">No timeline data available</Typography>
+                    <Typography variant="body2" color="text.secondary">暂无时间线数据</Typography>
                 )}
             </Box>
         );
@@ -435,7 +435,7 @@ const TimelineChart = ({
                                     fontSize={12}
                                     fontWeight={500}
                                 >
-                                    {p.count} detections
+                                    {p.count} 检测
                                 </text>
                             </g>
                         )}
@@ -489,7 +489,7 @@ const PopulationChart = ({
         return (
             <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loading ? <Skeleton variant="rounded" width="100%" height={120} /> : (
-                    <Typography variant="body2" color="text.secondary">No individuals tracked yet</Typography>
+                    <Typography variant="body2" color="text.secondary">尚未追踪任何个体</Typography>
                 )}
             </Box>
         );
@@ -600,9 +600,9 @@ const ActivityItem = ({
 }) => {
     const theme = useTheme();
     const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
-        group: { icon: FolderOpen, label: 'Uploaded' },
-        classification: { icon: Sparkle, label: 'Classified' },
-        reid: { icon: Fingerprint, label: 'Re-identified' }
+        group: { icon: FolderOpen, label: '已上传' },
+        classification: { icon: Sparkle, label: '已分类' },
+        reid: { icon: Fingerprint, label: '已鉴别' }
     };
     const config = typeConfig[type] || typeConfig.group;
     const Icon = config.icon;
@@ -613,9 +613,9 @@ const ActivityItem = ({
         const diff = now.getTime() - d.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-        if (days === 0) return 'Today';
-        if (days === 1) return 'Yesterday';
-        if (days < 7) return `${days} days ago`;
+        if (days === 0) return '今天';
+        if (days === 1) return '昨天';
+        if (days < 7) return `${days} 天前`;
         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     };
 
@@ -639,7 +639,7 @@ const ActivityItem = ({
             <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body2" fontWeight={500} noWrap>{name}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                    {config.label} • {count} item{count !== 1 ? 's' : ''}
+                    {config.label} • {count} 项
                 </Typography>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
@@ -715,10 +715,10 @@ export default function Dashboard() {
 
     // Summary stats for bar chart
     const summaryBarData = useMemo(() => [
-        { label: 'Images', value: stats?.totalImages || 0 },
-        { label: 'Detections', value: stats?.totalDetections || 0 },
-        { label: 'Individuals', value: stats?.totalIndividuals || 0 },
-        { label: 'ReID Runs', value: stats?.totalReidRuns || 0 },
+        { label: '图片', value: stats?.totalImages || 0 },
+        { label: '检测', value: stats?.totalDetections || 0 },
+        { label: '个体', value: stats?.totalIndividuals || 0 },
+        { label: '个体鉴别运行', value: stats?.totalReidRuns || 0 },
     ], [stats]);
 
     return (
@@ -727,15 +727,15 @@ export default function Dashboard() {
             {/* Header */}
             <Box sx={{ py: 3, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                    <Typography variant="h5" fontWeight={600}>Dashboard</Typography>
+                    <Typography variant="h5" fontWeight={600}>仪表板</Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Wildlife monitoring and conservation insights (Dev Only, actual insightful charts to be discussed)
+                        基于深度学习的鱼类识别系统，此为开发演示版。开春后有大量数据，性能会大幅提升。
                     </Typography>
                 </Box>
                 <Box data-tour="new-job">
                     <AiModeContext.Provider value={{ shouldPlayEffect, setShouldPlayEffect }}>
                         <AiModeButton
-                            text="New Job"
+                            text="新建任务"
                             onClick={triggerUpload}
                         />
                     </AiModeContext.Provider>
@@ -749,10 +749,10 @@ export default function Dashboard() {
                 gap: 2,
                 mb: 3
             }}>
-                <StatCard title="Total Images" value={stats?.totalImages || 0} loading={loading} hasGradient={hasGradient} />
-                <StatCard title="Detections" value={stats?.totalDetections || 0} loading={loading} hasGradient={hasGradient} />
-                <StatCard title="Individuals" value={stats?.totalIndividuals || 0} loading={loading} hasGradient={hasGradient} />
-                <StatCard title="Groups" value={stats?.totalGroups || 0} loading={loading} hasGradient={hasGradient} />
+                <StatCard title="总图片" value={stats?.totalImages || 0} loading={loading} hasGradient={hasGradient} />
+                <StatCard title="检测" value={stats?.totalDetections || 0} loading={loading} hasGradient={hasGradient} />
+                <StatCard title="个体" value={stats?.totalIndividuals || 0} loading={loading} hasGradient={hasGradient} />
+                <StatCard title="组" value={stats?.totalGroups || 0} loading={loading} hasGradient={hasGradient} />
             </Box>
 
             {/* Row 1 - Species Distribution & Population Tracking */}
@@ -770,10 +770,10 @@ export default function Dashboard() {
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                         <ChartDonut size={20} weight="duotone" color={theme.palette.primary.main} />
-                        <Typography variant="subtitle1" fontWeight={600}>Species Distribution</Typography>
+                        <Typography variant="subtitle1" fontWeight={600}>物种分布</Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, mt: -2 }}>
-                        Breakdown of detected species across all images
+                        所有图片中检测到的物种分解
                     </Typography>
                     <RingChart data={speciesChartData} loading={loading} />
                 </Box>
@@ -790,10 +790,10 @@ export default function Dashboard() {
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                         <Users size={20} weight="duotone" color={theme.palette.primary.main} />
-                        <Typography variant="subtitle1" fontWeight={600}>Population Tracking</Typography>
+                        <Typography variant="subtitle1" fontWeight={600}>种群追踪</Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, mt: -2 }}>
-                        Unique individuals identified per species
+                        每个物种鉴别出的独特个体
                     </Typography>
                     <PopulationChart data={stats?.individualsPerSpecies || []} loading={loading} />
                 </Box>
@@ -814,10 +814,10 @@ export default function Dashboard() {
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                         <CalendarBlank size={20} weight="duotone" color={theme.palette.primary.main} />
-                        <Typography variant="subtitle1" fontWeight={600}>Detection Activity</Typography>
+                        <Typography variant="subtitle1" fontWeight={600}>检测活动</Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, mt: -2 }}>
-                        Wildlife detections over the last 6 months
+                        过去6个月的野生动物检测
                     </Typography>
                     <TimelineChart data={stats?.detectionTimeline || []} loading={loading} />
                 </Box>
@@ -834,10 +834,10 @@ export default function Dashboard() {
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                         <TrendUp size={20} weight="duotone" color={theme.palette.primary.main} />
-                        <Typography variant="subtitle1" fontWeight={600}>Data Summary</Typography>
+                        <Typography variant="subtitle1" fontWeight={600}>数据汇总</Typography>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, mt: -2 }}>
-                        Overview of processed wildlife data
+                        已处理野生动物数据概览
                     </Typography>
                     <BarChart data={summaryBarData} loading={loading} />
                 </Box>
@@ -855,7 +855,7 @@ export default function Dashboard() {
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                     <Clock size={20} weight="duotone" color={theme.palette.primary.main} />
-                    <Typography variant="subtitle1" fontWeight={600}>Recent Activity</Typography>
+                    <Typography variant="subtitle1" fontWeight={600}>最近活动</Typography>
                 </Box>
 
                 {loading ? (
@@ -880,10 +880,10 @@ export default function Dashboard() {
                     <Box sx={{ py: 4, textAlign: 'center' }}>
                         <Clock size={40} weight="thin" color={theme.palette.text.disabled} />
                         <Typography color="text.secondary" sx={{ mt: 1 }}>
-                            No recent activity yet
+                            尚无最近活动
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Start by uploading images in the Library
+                            在图库中开始上传图片
                         </Typography>
                     </Box>
                 )}

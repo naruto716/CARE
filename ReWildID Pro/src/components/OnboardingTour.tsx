@@ -9,8 +9,8 @@ const DASHBOARD_STEPS: DriveStep[] = [
     {
         element: '[data-tour="new-job"]',
         popover: {
-            title: 'Welcome to ReWildID! 🎉',
-            description: 'Click here to start a new job. You can also drag & drop folders anywhere in the app!',
+            title: '欢迎使用ReWildID! 🎉',
+            description: '点击这里开始新任务。你也可以在应用中的任何地方拖放文件夹！',
             side: 'bottom',
             align: 'end',
         },
@@ -18,8 +18,8 @@ const DASHBOARD_STEPS: DriveStep[] = [
     {
         element: '[data-tour="nav-dashboard"]',
         popover: {
-            title: 'Dashboard',
-            description: 'Dashboard shows your project overview - statistics, recent activity, and insights.',
+            title: '仪表板',
+            description: '仪表板显示你的项目概览 - 统计数据、最近活动和见解。',
             side: 'right',
             align: 'start',
         },
@@ -27,8 +27,8 @@ const DASHBOARD_STEPS: DriveStep[] = [
     {
         element: '[data-tour="nav-library"]',
         popover: {
-            title: 'Library',
-            description: 'Library is your unified workspace for browsing images, running AI classification, and re-identifying individuals.',
+            title: '图库',
+            description: '图库是你的统一工作区，用于浏览图片、运行AI分类和重新鉴别个体。',
             side: 'right',
             align: 'start',
         },
@@ -36,8 +36,8 @@ const DASHBOARD_STEPS: DriveStep[] = [
     {
         element: '[data-tour="nav-classification"]',
         popover: {
-            title: 'Classification',
-            description: 'Classification is where AI detects and identifies species in your images.',
+            title: '分类',
+            description: '分类是AI检测和识别你图片中物种的地方。',
             side: 'right',
             align: 'start',
         },
@@ -45,8 +45,8 @@ const DASHBOARD_STEPS: DriveStep[] = [
     {
         element: '[data-tour="nav-reid"]',
         popover: {
-            title: 'Re-identification',
-            description: 'Re-ID tracks individual animals across images using AI-powered recognition.',
+            title: '个体鉴别',
+            description: '个体鉴别使用AI识别技术在图片中追踪单个动物。',
             side: 'right',
             align: 'start',
         },
@@ -57,8 +57,8 @@ const LIBRARY_STEPS: DriveStep[] = [
     {
         element: '[data-tour="library-filter"]',
         popover: {
-            title: 'Filter',
-            description: 'Filter images by date, groups, or other criteria.',
+            title: '筛选',
+            description: '按日期、组或其他条件筛选图片。',
             side: 'bottom',
             align: 'center',
         },
@@ -66,8 +66,8 @@ const LIBRARY_STEPS: DriveStep[] = [
     {
         element: '[data-tour="library-select"]',
         popover: {
-            title: 'Select Mode',
-            description: 'Enter selection mode to select multiple images for batch operations. You can also long-press any image to start selecting!',
+            title: '选择模式',
+            description: '进入选择模式以选择多张图片进行批量操作。你也可以长按任何图片开始选择！',
             side: 'bottom',
             align: 'center',
         },
@@ -75,8 +75,8 @@ const LIBRARY_STEPS: DriveStep[] = [
     {
         element: '[data-tour="library-sort"]',
         popover: {
-            title: 'Sort Images',
-            description: 'Sort images by species, individual (from Re-ID runs), or filename.',
+            title: '排序图片',
+            description: '按物种、个体（来自个体鉴别运行）或文件名排序图片。',
             side: 'bottom',
             align: 'center',
         },
@@ -84,8 +84,8 @@ const LIBRARY_STEPS: DriveStep[] = [
     {
         element: '[data-tour="library-analyse"]',
         popover: {
-            title: 'Analyse with AI ✨',
-            description: 'Click Analyse on any group to run AI classification or re-identification.',
+            title: '使用AI分析 ✨',
+            description: '在任何组上点击分析以运行AI分类或个体鉴别。',
             side: 'left',
             align: 'start',
         },
@@ -93,8 +93,8 @@ const LIBRARY_STEPS: DriveStep[] = [
     {
         element: '[data-tour="library-grid"]',
         popover: {
-            title: 'Zoom Previews 🔍',
-            description: 'Use Ctrl + Scroll (or pinch on trackpad) to zoom in/out the image grid!',
+            title: '缩放预览 🔍',
+            description: '使用Ctrl + 滚轮（或在触摸板上换指）放大/缩小图片网格！',
             side: 'top',
             align: 'center',
         },

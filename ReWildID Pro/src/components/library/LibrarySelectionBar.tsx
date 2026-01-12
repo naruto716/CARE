@@ -15,11 +15,11 @@ interface LibrarySelectionBarProps {
     availableSpecies?: string[];
 }
 
-export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({ 
-    selectedCount, 
-    onClose, 
-    onDelete, 
-    onClassify, 
+export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({
+    selectedCount,
+    onClose,
+    onDelete,
+    onClassify,
     onReID,
     onSave,
     leftSidebarOpen = false,
@@ -58,30 +58,30 @@ export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({
                     easing: theme.transitions.easing.easeOut
                 })
             }}>
-                <Tooltip title="Exit Selection Mode">
+                <Tooltip title="退出选择模式">
                     <IconButton onClick={onClose} size="small" sx={{ color: theme.palette.text.secondary }}>
                         <X weight="bold" />
                     </IconButton>
                 </Tooltip>
-                
+
                 <Typography variant="body2" fontWeight={600} sx={{ mx: 1, minWidth: '80px', textAlign: 'center' }}>
-                    {selectedCount} Selected
+                    {selectedCount} 已选择
                 </Typography>
 
                 <Box sx={{ height: '20px', width: '1px', bgcolor: theme.palette.divider, mx: 0.5 }} />
 
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <Tooltip title="Save Selected">
+                    <Tooltip title="保存选中项">
                         <IconButton onClick={onSave} size="small" sx={{ '&:hover': { color: theme.palette.primary.main } }}>
                             <DownloadSimple />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete Selected">
+                    <Tooltip title="删除选中项">
                         <IconButton onClick={onDelete} size="small" sx={{ '&:hover': { color: theme.palette.error.main } }}>
                             <Trash />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Analyse">
+                    <Tooltip title="分析">
                         <IconButton onClick={() => setAnalyseMenuOpen(true)} size="small" color="primary">
                             <Sparkle weight="fill" />
                         </IconButton>
