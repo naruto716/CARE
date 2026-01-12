@@ -229,6 +229,28 @@ const LibraryPage: React.FC = () => {
         }
     }, [allImages, selectedImageIds, setSelection]);
 
+    // Effect: Ctrl+A to select all images
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key === 'a') {
+                // Prevent default browser select-all behavior
+                e.preventDefault();
+
+                // If not in selection mode, enable it first
+                if (!isSelectionMode) {
+                    setIsSelectionMode(true);
+                }
+
+                // Select all visible images
+                const allIds = new Set(allImages.map(img => img.id));
+                setSelection(allIds);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [allImages, isSelectionMode, setIsSelectionMode, setSelection]);
+
     // Batch Actions
     const handleBatchSave = async () => {
         if (selectedImageIds.size === 0) return;
