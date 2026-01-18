@@ -8,7 +8,50 @@
         "build": "tsc && vite build && npm run electron:build",
         "preview": "vite preview",
         "electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
-        "electron:build": "tsc -p electron/tsconfig.json"
+        "electron:build": "tsc -p electron/tsconfig.json",
+        "dist": "npm run build && electron-builder",
+        "dist:win": "npm run build && electron-builder --win"
+    },
+    "build": {
+        "appId": "com.rewildid.pro",
+        "productName": "鱼类识别",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*",
+            "dist-electron/**/*"
+        ],
+        "extraResources": [
+            {
+                "from": "resources",
+                "to": "resources",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "resources/icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": true,
+            "allowToChangeInstallationDirectory": true,
+            "installerLanguages": [
+                "zh_CN",
+                "en_US"
+            ],
+            "language": "0804"
+        }
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.966.0",

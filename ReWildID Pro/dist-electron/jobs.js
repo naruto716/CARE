@@ -936,7 +936,7 @@ class JobManager {
         console.log(`[Cloud Detect] Created batch ${batchId}`);
         let savedCount = 0;
         for (const det of result.detections) {
-            // bbox is [x1, y1, x2, y2] normalized
+            // bbox is [x1, y1, x2, y2] in pixels
             const [x1, y1, x2, y2] = det.bbox;
             database_1.DatabaseService.addDetection(batchId, det.image_id, det.species, // label
             det.confidence, // pred_conf (classification confidence)
